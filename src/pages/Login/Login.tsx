@@ -7,6 +7,8 @@ import LogoUd from '../../images/img/logo_UD.png'
 
 import AuthUser from "../../components/AuthUser/AuthUser";
 
+import URLS from "../../../src/js/configUrl"
+
 
 const Login = () => {
     const {http, setToken} = AuthUser()
@@ -33,7 +35,7 @@ const Login = () => {
         bodyContent.append("username", username);
         bodyContent.append("password", password);
 
-        let response = await fetch("http://127.0.0.1:8000/login/", { 
+        let response = await fetch(`${URLS.API_BACK}/login/`, { 
         method: "POST",
         body: bodyContent,
         headers: headersList
