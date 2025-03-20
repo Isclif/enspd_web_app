@@ -14,7 +14,7 @@
     "url": "https://tailadmin.com"
   },
   "dependencies": {
-    "@heroicons/react": "^2.1.5",
+    "@heroicons/react": "^2.2.0",
     "apexcharts": "^3.41.0",
     "axios": "^1.7.2",
     "flatpickr": "^4.6.13",
