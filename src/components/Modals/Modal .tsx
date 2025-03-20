@@ -47,7 +47,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center  bg-opacity-50 backdrop-brightness-50 ">
-      <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full transform scale-100">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full transform scale-100 dark:bg-boxdark">
         <h3 className="text-xl font-semibold text-center mb-6">{title}</h3>
         <form onSubmit={(e) => handleFormSubmit(e, 'etudiant')} className="w-full">
           <div className="grid grid-cols-2 gap-4 mb-6">

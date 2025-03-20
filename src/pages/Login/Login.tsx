@@ -6,6 +6,8 @@ import LogoENSPD from "../../images/img/logo_ENSPD.png";
 import LogoUd from "../../images/img/logo_UD.png";
 import AuthUser from "../../components/AuthUser/AuthUser";
 
+import URLS from "../../js/ConfigUrl"
+
 const Login = () => {
     const { http, setToken } = AuthUser();
     const [username, setUsername] = useState("");
@@ -20,7 +22,7 @@ const Login = () => {
         setCoSuccess("");
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/login/", {
+            const response = await fetch(`${URLS.API_BACK}/login/`, {
                 method: "POST",
                 body: JSON.stringify({ username, password }),
                 headers: {

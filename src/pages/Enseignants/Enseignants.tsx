@@ -7,6 +7,8 @@ import SectionHeader from "../../components/Header/SectionHeader";
 import CardFooterWithPagination from "../../components/Pagination/Pagination";
 import ModalForm from "../../components/Modals/Modal ";
 
+import URLS from "../../js/ConfigUrl"
+
 interface DataItem {
   id: number;
   username: string;
@@ -48,7 +50,8 @@ const Enseignants = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/list-professeur/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
+          `${URLS.API_BACK}/list-professeurs/`,
+          // `${URLS.API_BACK}/list-professeur/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
           {
             method: "GET",
             headers: headersList,
@@ -58,8 +61,10 @@ const Enseignants = () => {
           throw new Error("Erreur lors de la récupération des données");
         }
         const data = await response.json();
-        setData(data.results);
-        setTotalPages(data.total_pages);
+        console.log(data);
+        
+        setData(data);
+        // setTotalPages(data.total_pages);
       } catch (error) {
         console.error("Erreur lors de la récupération des données:", error);
       }
@@ -107,7 +112,7 @@ const Enseignants = () => {
       <ModalForm showModal={showModal} setShowModal={setShowModal} onSubmit={handleFormSubmit} title="Ajouter un étudiant" fields={fields} />
 
       {/* Formulaire de recherche */}
-      <div className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-5 mb-6">
+      <div className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-5 mb-6 dark:bg-boxdark">
       <h3 className="text-xl font-semibold text-center mb-4">Liste des enseignants</h3>
       <div className="w-full dark:bg-gray-800 rounded-lg p-5 mb-6">
         <div className="flex gap-2 justify-between">
@@ -117,7 +122,7 @@ const Enseignants = () => {
             placeholder="Username"
             value={searchTerm.username}
             onChange={handleSearchChange}
-            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3"
+            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
           />
           <input
             type="text"
@@ -125,7 +130,7 @@ const Enseignants = () => {
             placeholder="Matricule"
             value={searchTerm.matricule}
             onChange={handleSearchChange}
-            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3"
+            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
           />
           <input
             type="text"
@@ -133,7 +138,7 @@ const Enseignants = () => {
             placeholder="Spécialité"
             value={searchTerm.speciality}
             onChange={handleSearchChange}
-            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3"
+            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
           />
           <button onClick={handleSearch} className="ml-1 px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-400 transition">
             Rechercher
