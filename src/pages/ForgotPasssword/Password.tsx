@@ -7,6 +7,8 @@ import LogoUd from '../../images/img/logo_UD.png';
 
 import AuthUser from "../../components/AuthUser/AuthUser";
 
+import URLS from "../../js/ConfigUrl"
+
 const ForgotPassword = () => {
     const { http } = AuthUser();
     const [email, setEmail] = useState("");
@@ -24,7 +26,7 @@ const ForgotPassword = () => {
         let bodyContent = new FormData();
         bodyContent.append("email", email);
 
-        let response = await fetch("http://127.0.0.1:8000/forgot-password/", {
+        let response = await fetch(`${URLS.API_BACK}/forgot-password/`, {
             method: "POST",
             body: bodyContent,
             headers: headersList,

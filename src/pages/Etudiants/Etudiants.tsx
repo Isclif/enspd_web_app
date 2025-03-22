@@ -6,6 +6,7 @@ import SectionHeader from "../../components/Header/SectionHeader";
 import ModalForm from "../../components/Modals/Modal ";
 import CardFooterWithPagination from "../../components/Pagination/Pagination";
 
+import URLS from "../../js/ConfigUrl"
 
 
 interface DataItem {
@@ -47,7 +48,7 @@ const Etudiants = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/list-etudiants/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
+          `${URLS.API_BACK}/list-etudiants/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
           {
             method: "GET",
             headers: headersList,
@@ -57,8 +58,8 @@ const Etudiants = () => {
           throw new Error("Erreur lors de la récupération des données");
         }
         const data = await response.json();
-        setData(data.results);
-        setTotalPages(data.total_pages);
+        setData(data);
+        // setTotalPages(data.total_pages);
       } catch (error) {
         console.error("Erreur lors de la récupération des données:", error);
       }
@@ -106,7 +107,7 @@ const Etudiants = () => {
       />
 
       {/* Liste des étudiants */}
-      <div className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-5 mb-6">
+      <div className="w-full bg-white dark:bg-gray-800 dark:bg-boxdark shadow-md rounded-lg p-5 mb-6">
         <h3 className="text-xl font-semibold text-center mb-4">Liste des étudiants</h3>
 
         {/* Formulaire de recherche sous le tableau des étudiants */}
@@ -119,7 +120,7 @@ const Etudiants = () => {
               placeholder="Username"
               value={searchTerm.username}
               onChange={handleSearchChange}
-              className="px-4 py-2 rounded-lg border border-stroke shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 w-1/3"
+              className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
             />
             <input
               type="text"
@@ -127,7 +128,7 @@ const Etudiants = () => {
               placeholder="Matricule"
               value={searchTerm.matricule}
               onChange={handleSearchChange}
-              className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3"
+              className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
             />
             <input
               type="text"
@@ -135,7 +136,7 @@ const Etudiants = () => {
               placeholder="Spécialité"
               value={searchTerm.speciality}
               onChange={handleSearchChange}
-              className="px-4 py-2 rounded-lg border border-stroke w-1/3 shadow-default dark:border-strokedark"
+              className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
             />
             {/* Bouton Rechercher */}
             <button
@@ -149,8 +150,8 @@ const Etudiants = () => {
 
         <DataTable data={data} />
 
-             {/* Pagination */}
-             <div className="mt-6">
+        {/* Pagination */}
+        <div className="mt-6">
     <CardFooterWithPagination
     currentPage={page} 
     totalPages={totalPages} 

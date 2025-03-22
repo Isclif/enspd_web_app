@@ -3,6 +3,8 @@ import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
 import AuthUser from "../../components/AuthUser/AuthUser";
 import DataDep from "../../components/Tables/DataDep";
 
+import URLS from "../../js/ConfigUrl"
+
 interface DataItem {
   id: number;
   nom: string;
@@ -21,7 +23,7 @@ const Departements = () => {
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const response = await fetch("http://127.0.0.1:8000/dep/departements/", {
+            const response = await fetch(`${URLS.API_BACK}/dep/departements/`, {
               method: "GET",
               headers: headersList
             });

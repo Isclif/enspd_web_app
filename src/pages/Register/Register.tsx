@@ -6,6 +6,8 @@ import LogoENSPD from "../../images/img/logo_ENSPD.png";
 import LogoUd from "../../images/img/logo_UD.png";
 import AuthUser from "../../components/AuthUser/AuthUser";
 
+import URLS from "../../js/ConfigUrl";
+
 const Register = () => {
     const { setToken } = AuthUser();
     const navigate = useNavigate(); // Hook pour la redirection
@@ -22,7 +24,7 @@ const Register = () => {
     const [successMsg, setSuccessMsg] = useState("");
     const [stateError, setStateError] = useState(false);
     const [stateSuccess, setStateSuccess] = useState(false);
-    const [status, setStatus] = useState("etudiant");
+    const [status, setStatus] = useState("Etudiant");
 
     const [errorCo, setErrorCo] = useState("");
     const [coSuccess, setCoSuccess] = useState("");
@@ -56,7 +58,7 @@ const Register = () => {
         };
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/register/", {
+            const response = await fetch(`${URLS.API_BACK}/register/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -126,8 +128,8 @@ const Register = () => {
                             type="radio"
                             name="status"
                             value="etudiant"
-                            checked={status === "etudiant"}
-                            onChange={() => setStatus("etudiant")}
+                            checked={status === "Etudiant"}
+                            onChange={() => setStatus("Etudiant")}
                             className="form-radio text-blue-600"
                         />
                         Étudiant
@@ -137,8 +139,8 @@ const Register = () => {
                             type="radio"
                             name="status"
                             value="professeur"
-                            checked={status === "professeur"}
-                            onChange={() => setStatus("professeur")}
+                            checked={status === "Professeur"}
+                            onChange={() => setStatus("Professeur")}
                             className="form-radio text-blue-600"
                         />
                         Professeur
@@ -158,7 +160,7 @@ const Register = () => {
                 </div>
                 )}
                 <form>
-                    {status === "etudiant" && (
+                    {/* {status === "Etudiant" && (
                         <div className="mb-1">
                             <label className="mb-2.5 block font-medium">Matricule</label>
                             <input
@@ -168,7 +170,7 @@ const Register = () => {
                                 onChange={(e) => setMatricule(e.target.value)}
                             />
                         </div>
-                    )}
+                    )} */}
                     <div className="mb-1">
                         <label className="mb-2.5 block font-medium">UserName</label>
                         <input
@@ -194,6 +196,15 @@ const Register = () => {
                             placeholder="Entrez votre prénom"
                          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary"
                             onChange={(e) => setLastName(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-1">
+                        <label className="mb-2.5 block font-medium">Matricule</label>
+                        <input
+                            type="text"
+                            placeholder="Entrez votre matricule"
+                            className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary"
+                            onChange={(e) => setMatricule(e.target.value)}
                         />
                     </div>
                     <div className="mb-1">

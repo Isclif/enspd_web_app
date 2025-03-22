@@ -48,7 +48,7 @@ const CardFooterWithPagination: React.FC<CardFooterWithPaginationProps> = ({
 
       {/* Desktop view */}
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-gray-700 ">
           Page <span className="font-bold">{currentPage}</span> sur{" "}
           <span className="font-bold">{totalPages}</span>
         </p>
@@ -56,7 +56,7 @@ const CardFooterWithPagination: React.FC<CardFooterWithPaginationProps> = ({
           {/* Previous Button */}
           <button
             onClick={handlePreviousPage}
-            className="text-black text-sm font-medium px-4 py-2"
+            className="text-gray-700 text-sm font-medium px-4 py-2"
             disabled={currentPage === 1}
           >
             <ChevronLeftIcon className="h-5 w-5 inline-block" />
@@ -81,7 +81,7 @@ const CardFooterWithPagination: React.FC<CardFooterWithPaginationProps> = ({
           {/* Next Button */}
           <button
             onClick={handleNextPage}
-            className="text-black text-sm font-medium px-4 py-2"
+            className="text-gray-700 text-sm font-medium px-4 py-2"
             disabled={currentPage === totalPages}
           >
             <span className="mr-1">Next</span>
