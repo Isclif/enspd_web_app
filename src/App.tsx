@@ -25,6 +25,13 @@ import AuthUser from './components/AuthUser/AuthUser';
 import GuestLayout from './layout/GuestLayout';
 import NotFoundCo from './pages/NotFound/NotFoundCo';
 
+import EvaluationsModule, { EvaluationContainer } from './pages/EvaluationsModule';
+
+
+
+
+
+
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
@@ -41,6 +48,8 @@ function App() {
   if(!getToken()){
     return <GuestLayout />
   }
+
+
 
   return loading ? (
     <Loader />
@@ -93,6 +102,19 @@ function App() {
               </>
             }
           />
+             <Route
+  path="/examens/*"
+  element={
+    <>
+      <PageTitle title="modules evaluations" />
+      <EvaluationContainer />
+    </>
+  }
+/>
+
+
+
+           
           <Route
           path="/profile"
           element={
@@ -138,6 +160,9 @@ function App() {
             </>
           }
         />
+
+
+          
           {/* <Route
             path="/ui/alerts"
             element={
@@ -183,6 +208,7 @@ function App() {
           />
         </Routes>
       </DefaultLayout>
+      {/* <RoleTest/> */}
     </div>
   );
 }
