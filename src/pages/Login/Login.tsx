@@ -123,6 +123,10 @@ const Login = () => {
                     <p className="mt-4 text-center text-gray-600">
                         Pas encore inscrit ? <Link to="/register" className="text-blue-600 font-bold">S'inscrire</Link>
                     </p>
+                    
+                    {/* <Link to="/uploadVideo" className="text-primary">
+                      Upload video
+                    </Link> */}
                 </div>
             </div>
         </div>

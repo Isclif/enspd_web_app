@@ -13,7 +13,7 @@ interface ModalFormProps {
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
   onSubmit: (data: { [key: string]: string }) => void;
   title: string;
-  fields: Field[];
+  fields: any[];
 }
 
 const ModalForm: React.FC<ModalFormProps> = ({
@@ -49,7 +49,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     <div className="fixed inset-0 flex items-center justify-center  bg-opacity-50 backdrop-brightness-50 ">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full transform scale-100 dark:bg-boxdark">
         <h3 className="text-xl font-semibold text-center mb-6">{title}</h3>
-        <form onSubmit={(e) => handleFormSubmit(e, 'etudiant')} className="w-full">
+        <form className="w-full">
           <div className="grid grid-cols-2 gap-4 mb-6">
             {fields.map((field) => (
               <div key={field.name} className="flex flex-col px-3">
@@ -66,20 +66,20 @@ const ModalForm: React.FC<ModalFormProps> = ({
             ))}
           </div>
 
-          <div className="flex justify-center gap-4 mt-6">
-            <button
+          <div className="flex justify-end gap-4 mt-6">
+            {/* <button
               type="submit"
               className="px-2 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              onClick={(e) => handleFormSubmit(e, 'etudiant')}
+              onClick={(e) => handleFormSubmit(e, 'Etudiant')}
             >
               Enregistrer en tant qu'étudiant
-            </button>
+            </button> */}
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              onClick={(e) => handleFormSubmit(e, 'professeur')}
+              onClick={(e) => handleFormSubmit(e, 'Professeur')}
             >
-              Enregistrer en tant que professeur
+              Enregistrer
             </button>
             <button
               type="button"

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import UserOne from '../../images/user/user-01.png';
-import userAdmin from '../../images/img/user/user.png'
+import userAdmin from '../../images/img/user/student_logo.png'
 import AuthUser from '../AuthUser/AuthUser';
 
 const DropdownUser = () => {
@@ -12,6 +12,7 @@ const DropdownUser = () => {
           logout()
       }
   }
+  
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
@@ -24,9 +25,9 @@ const DropdownUser = () => {
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
             {/* Emmanuel ESSAMA NANGA */}
-            {user.username}
+            {user?.username}
           </span>
-          <span className="block text-xs">Admin</span>
+          <span className="block text-xs">{user?.status}</span>
         </span>
 
         <span className="h-12 w-12">

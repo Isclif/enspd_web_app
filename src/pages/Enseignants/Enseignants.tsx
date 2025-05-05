@@ -8,6 +8,7 @@ import CardFooterWithPagination from "../../components/Pagination/Pagination";
 import ModalForm from "../../components/Modals/Modal ";
 
 import URLS from "../../js/ConfigUrl"
+import { PlusCircleIcon } from "@heroicons/react/24/solid";
 
 interface DataItem {
   id: number;
@@ -19,6 +20,14 @@ interface DataItem {
   status: string;
   speciality: string;
   sexe: string;
+}
+
+interface FieldsInterface {
+  name: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  value: string;
 }
 
 const Enseignants = () => {
@@ -39,39 +48,63 @@ const Enseignants = () => {
     speciality: "",
   });
 
-  const [fields, setFields] = useState([
+  const [fields, setFields] = useState<FieldsInterface[]>([
     { name: "username", label: "Username", type: "text", placeholder: "Entrez le nom d'utilisateur", value: "" },
     { name: "email", label: "Email", type: "email", placeholder: "Entrez l'email", value: "" },
     { name: "matricule", label: "Matricule", type: "text", placeholder: "Entrez le matricule", value: "" },
     { name: "telephone", label: "Téléphone", type: "tel", placeholder: "Entrez le téléphone", value: "" },
   ]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${URLS.API_BACK}/list-professeurs/`,
-          // `${URLS.API_BACK}/list-professeur/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
-          {
-            method: "GET",
-            headers: headersList,
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Erreur lors de la récupération des données");
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        `${URLS.API_BACK}/professeurs/`,
+        // `${URLS.API_BACK}/list-professeur/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
+        {
+          method: "GET",
+          headers: headersList,
         }
-        const data = await response.json();
-        console.log(data);
-        
-        setData(data);
-        // setTotalPages(data.total_pages);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données:", error);
+      );
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des données");
       }
-    };
+      const data = await response.json();
+      console.log(data);
+      
+      setData(data);
+      // setTotalPages(data.total_pages);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données:", error);
+    }
+  };
 
+
+  const filterDataTable = () => {
+    let dataTableFiltered = data?.filter((item) =>
+      (searchTerm.username && item.username.toLowerCase().includes(searchTerm.username.toLowerCase())) ||
+      (searchTerm.matricule && item.matricule.toLowerCase().includes(searchTerm.matricule.toLowerCase())) ||
+      (searchTerm.speciality && item.speciality.toLowerCase().includes(searchTerm.speciality.toLowerCase()))
+    )
+
+    if(dataTableFiltered.length === 0){
+      fetchData()
+    } else {
+      setData(dataTableFiltered)
+    }
+
+
+    // console.log("dataTableFiltered", dataTableFiltered);
+    
+  }
+
+  useEffect(() => {
     fetchData();
-  }, [searchTerm, page]);
+  }, []);
+// }, [searchTerm, page]);
+
+  useEffect(() => {
+    filterDataTable();
+  }, [searchTerm]);
 
   const handleEdit = (id: number) => {
     const item = data.find((item) => item.id === id);
@@ -106,54 +139,67 @@ const Enseignants = () => {
     <>
       <Breadcrumb pageName="Listes des enseignants" />
 
-      <SectionHeader title="Gestion des Enseignants" onAddClick={() => setShowModal(true)} />
+      {/* <SectionHeader title="Gestion des Enseignants" onAddClick={() => setShowModal(true)} /> */}
 
       {/* Modal dynamique */}
       <ModalForm showModal={showModal} setShowModal={setShowModal} onSubmit={handleFormSubmit} title="Ajouter un étudiant" fields={fields} />
 
       {/* Formulaire de recherche */}
       <div className="w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-5 mb-6 dark:bg-boxdark">
-      <h3 className="text-xl font-semibold text-center mb-4">Liste des enseignants</h3>
-      <div className="w-full dark:bg-gray-800 rounded-lg p-5 mb-6">
-        <div className="flex gap-2 justify-between">
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={searchTerm.username}
-            onChange={handleSearchChange}
-            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
-          />
-          <input
-            type="text"
-            name="matricule"
-            placeholder="Matricule"
-            value={searchTerm.matricule}
-            onChange={handleSearchChange}
-            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
-          />
-          <input
-            type="text"
-            name="speciality"
-            placeholder="Spécialité"
-            value={searchTerm.speciality}
-            onChange={handleSearchChange}
-            className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
-          />
-          <button onClick={handleSearch} className="ml-1 px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-400 transition">
-            Rechercher
-          </button>
-        </div>
+        <div className="flex justify-between">
+          <div>
+            <h3 className="text-md ">Recherche</h3>
+            <div className="w-full dark:bg-gray-800 rounded-lg pt-2 mb-6">
+              <div className="flex gap-2 justify-between">
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  value={searchTerm.username}
+                  onChange={handleSearchChange}
+                  className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
+                />
+                <input
+                  type="text"
+                  name="matricule"
+                  placeholder="Matricule"
+                  value={searchTerm.matricule}
+                  onChange={handleSearchChange}
+                  className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
+                />
+                <input
+                  type="text"
+                  name="speciality"
+                  placeholder="Spécialité"
+                  value={searchTerm.speciality}
+                  onChange={handleSearchChange}
+                  className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
+                />
+                <button onClick={filterDataTable} className="ml-1 px-2 py-2 bg-blue-700 text-white  rounded-lg hover:bg-blue-900 transition">
+                  Rechercher
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* <div className="flex flex-row justify-center items-center mt-2">
+            <button className="ml-1 px-2 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-400 transition" onClick={() => setShowModal(true)} >
+              <div className="flex space-x-1">
+                <span className="text-md">Ajouter</span> 
+                <PlusCircleIcon className="h-6 z-6" />
+              </div>
+            </button>
+          </div> */}
         </div>
 
-      <div className="flex flex-col gap-10">
-        <DataTable data={data} onEdit={handleEdit} />
-      </div>
+        <div className="flex flex-col gap-10">
+          <DataTable data={data} onEdit={handleEdit} />
+        </div>
 
-      {/* Pagination */}
-      <div className="mt-6">
-        <CardFooterWithPagination currentPage={page} totalPages={totalPages} onPageChange={handlePagination} />
-      </div>
+        {/* Pagination */}
+        <div className="mt-6">
+          <CardFooterWithPagination currentPage={page} totalPages={totalPages} onPageChange={handlePagination} />
+        </div>
 
       </div>
     </>

@@ -24,6 +24,12 @@ import Etudiants from './pages/Etudiants/Etudiants';
 import AuthUser from './components/AuthUser/AuthUser';
 import GuestLayout from './layout/GuestLayout';
 import NotFoundCo from './pages/NotFound/NotFoundCo';
+import DepartementDetail from './pages/Departements/DepartmentDetail';
+import Cours from './pages/Cours/Cours';
+import Specialities from './pages/Specialities/Specialities';
+import CoursDetails from './pages/Cours/CoursDetails';
+import CoursContentView from './pages/Cours/CoursContentView';
+import Enrollments from './pages/Enrollments/Enrollments';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,6 +69,54 @@ function App() {
               <>
                 <PageTitle title="departements" />
                 <Departements />
+              </>
+            }
+          />
+          <Route path="/departements/:uuid" 
+            element={
+              <>
+                <PageTitle title="departements details" />
+                <DepartementDetail />
+              </>
+            }
+          />
+          <Route path="/specialites" 
+            element={
+              <>
+                <PageTitle title="specialites" />
+                <Specialities />
+              </>
+            }
+          />
+          <Route path="/cours" 
+            element={
+              <>
+                <PageTitle title="cours" />
+                <Cours />
+              </>
+            }
+          />
+          <Route path="/cours/:uuid" 
+            element={
+              <>
+                <PageTitle title="cours details" />
+                <CoursDetails />
+              </>
+            }
+          />
+          <Route path="/cours_content_detail/:uuid" 
+            element={
+              <>
+                <PageTitle title="contenu du cours" />
+                <CoursContentView />
+              </>
+            }
+          />
+          <Route path="/enrollments" 
+            element={
+              <>
+                <PageTitle title="mes cours" />
+                <Enrollments />
               </>
             }
           />

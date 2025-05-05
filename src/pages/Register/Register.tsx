@@ -172,7 +172,7 @@ const Register = () => {
                         </div>
                     )} */}
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">UserName</label>
+                        <label className="mb-2.5 block font-medium">UserName :</label>
                         <input
                             type="text"
                             placeholder="Entrez votre nom utilisateur"
@@ -181,7 +181,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">FirstName</label>
+                        <label className="mb-2.5 block font-medium">FirstName :</label>
                         <input
                             type="text"
                             placeholder="Entrez votre nom"
@@ -190,7 +190,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">LastName</label>
+                        <label className="mb-2.5 block font-medium">LastName :</label>
                         <input
                             type="text"
                             placeholder="Entrez votre prénom"
@@ -199,7 +199,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">Matricule</label>
+                        <label className="mb-2.5 block font-medium">Matricule :</label>
                         <input
                             type="text"
                             placeholder="Entrez votre matricule"
@@ -208,7 +208,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">Spécialité</label>
+                        <label className="mb-2.5 block font-medium">Spécialité :</label>
                         <input
                             type="text"
                             placeholder="Dans quelle spécialité vous inscrivez-vous ?"
@@ -217,7 +217,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">Téléphone</label>
+                        <label className="mb-2.5 block font-medium">Téléphone :</label>
                         <input
                             type="tel"
                             placeholder="Entrez votre numéro de téléphone"
@@ -226,30 +226,30 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">Sexe</label>
-                        <div className="flex justify-between gap-4">
-                            <label>
+                        <label className="mb-2.5 block font-medium">Sexe :</label>
+                        <div className="flex space-x-4">
+                            <label className="space-x-2">
                                 <input
                                     type="radio"
                                     value="Masculin"
                                     checked={sexe === "Masculin"}
                                     onChange={() => setSexe("Masculin")}
                                 />
-                                Masculin
+                                <span>Masculin</span>
                             </label>
-                            <label>
+                            <label className="space-x-2">
                                 <input
                                     type="radio"
                                     value="Feminin"
                                     checked={sexe === "Feminin"}
                                     onChange={() => setSexe("Feminin")}
                                 />
-                                Féminin
+                                <span>Féminin</span>
                             </label>
                         </div>
                     </div>
                     <div className="mb-1">
-                        <label className="mb-2.5 block font-medium">Email</label>
+                        <label className="mb-2.5 block font-medium">Email :</label>
                         <input
                             type="email"
                             placeholder="Entrez votre email"
@@ -258,7 +258,7 @@ const Register = () => {
                         />
                     </div>
                     <div className="mb-6">
-                        <label className="mb-2.5 block font-medium">Mot de passe</label>
+                        <label className="mb-2.5 block font-medium">Mot de passe :</label>
                         
                            
                             <input

@@ -213,3 +213,28 @@ span.flatpickr-weekday,
 [x-cloak] {
   display: none !important;
 }
+
+/* Personnalisation du scrollbar pour Webkit-based browsers */
+.scroll-custom::-webkit-scrollbar {
+  width: 8px; /* Largeur du scrollbar */
+}
+
+.scroll-custom::-webkit-scrollbar-track {
+  background: #f3f4f6; /* Couleur de la piste */
+  border-radius: 10px;
+}
+
+.scroll-custom::-webkit-scrollbar-thumb {
+  background: #6b7280; /* Couleur du thumb (poignée) */
+  border-radius: 10px;
+}
+
+.scroll-custom::-webkit-scrollbar-thumb:hover {
+  background: #4b5563; /* Couleur au survol */
+}
+
+/* Personnalisation pour Firefox */
+.scroll-custom {
+  scrollbar-width: thin; /* Largeur fine */
+  scrollbar-color: #6b7280 #f3f4f6; /* Couleur du thumb et de la piste */
+}

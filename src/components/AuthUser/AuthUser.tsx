@@ -92,7 +92,7 @@ export default function AuthUser() {
         sessionStorage.setItem('user', JSON.stringify(user));
 
         setToken(token);
-        setUser(user);
+        setUser(user); 
         if(token != undefined && user != undefined){
             setTimeout(() => {
                 navigate("/dashboard");

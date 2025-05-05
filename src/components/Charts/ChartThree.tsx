@@ -1,10 +1,15 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
 interface ChartThreeState {
   series: number[];
 }
+
+interface ChartThreeProps {
+  studentsData: any[];
+}
+
 
 const options: ApexOptions = {
   chart: {
@@ -49,17 +54,29 @@ const options: ApexOptions = {
   ],
 };
 
-const ChartThree: React.FC = () => {
+const ChartThree: React.FC<ChartThreeProps> = ({ studentsData }) => {
+
+  const studentsMales = studentsData?.filter((item) => (item.sexe === "Masculin")).length
+  const studentsFemales = studentsData?.filter((item) => (item.sexe === "Feminin")).length
+
+  // console.log("studentsMales", studentsMales);
+  // console.log("studentsFemales", studentsFemales);
+  
   const [state, setState] = useState<ChartThreeState>({
-    series: [34, 66],
+    series: [studentsMales, studentsFemales],
   });
 
   const handleReset = () => {
     setState((prevState) => ({
       ...prevState,
-      series: [34, 66],
+      series: [studentsMales, studentsFemales],
     }));
   };
+
+  useEffect(()=>{
+    handleReset()
+  }, [studentsData])
+
   handleReset;
 
   return (
@@ -113,7 +130,7 @@ const ChartThree: React.FC = () => {
           <ReactApexChart
             options={options}
             series={state.series}
-            type="donut"
+            type="pie"
           />
         </div>
       </div>
@@ -124,7 +141,7 @@ const ChartThree: React.FC = () => {
             <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#024576]"></span>
             <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
               <span> Etudiants Masculins </span>
-              <span> 34% </span>
+              <span> {studentsMales !== 0 ? (Math.round(studentsMales * 100)) / studentsData?.length : 0}% </span>
             </p>
           </div>
         </div>
@@ -133,7 +150,7 @@ const ChartThree: React.FC = () => {
             <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#ffdd00]"></span>
             <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
               <span> Etudiants Féminins </span>
-              <span> 66% </span>
+              <span> {studentsFemales !== 0 ? (Math.round(studentsFemales * 100)) / studentsData?.length : 0}% </span>
             </p>
           </div>
         </div>

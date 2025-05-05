@@ -70,7 +70,7 @@ const CardFooterWithPagination: React.FC<CardFooterWithPaginationProps> = ({
               onClick={() => onPageChange(index + 1)}
               className={`px-4 py-2 border text-sm font-medium transition-colors duration-200 ${
                 currentPage === index + 1
-                  ? "bg-yellow-600 text-white border-yellow-600"
+                  ? "bg-yellow-500 text-white border-yellow-400"
                   : "bg-yellow-500 text-black hover:bg-yellow-600"
               }`}
             >

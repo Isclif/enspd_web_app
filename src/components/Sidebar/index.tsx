@@ -3,7 +3,9 @@ import { NavLink, useLocation } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import LogoEnspd from '../../images/img/svg/Enspd_svg.svg';
 import LogoUd from '../../images/img/svg/Ud_svg.svg';
-import { ChevronRightIcon, DocumentIcon, SwatchIcon, UserGroupIcon, UsersIcon } from "@heroicons/react/16/solid";
+import { ChevronRightIcon, DocumentIcon, SwatchIcon, UserGroupIcon, UsersIcon, ChevronDownIcon, ChevronUpIcon, BookOpenIcon, AdjustmentsHorizontalIcon, BookmarkIcon } from "@heroicons/react/24/solid";
+import HassAccess from '../utils/HassAccess';
+import AuthUser from '../AuthUser/AuthUser';
 
 
 interface SidebarProps {
@@ -18,10 +20,66 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
 
+  const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
+  const [activeParent, setActiveParent] = useState<string | null>(null);
+
+  const handleSubItemClick = (key: string) => {
+    setActiveSubMenu(key);
+  };
+
+  const closeAllDropdowns = () => {
+    setActiveParent(null);
+  };
+
   const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
+
+  const {user} = AuthUser()
+
+  // let dept = [
+  //   {
+  //     "id":"1",
+  //     "name":"dept1"
+  //   },
+  //   {
+  //     "id":"2",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"3",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"4",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"5",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"6",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"7",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"8",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"9",
+  //     "name":"dept2"
+  //   },
+  //   {
+  //     "id":"10",
+  //     "name":"dept2"
+  //   },
+  // ]
 
   // close on click outside
   useEffect(() => {
@@ -138,7 +196,46 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Dashboard --> */}
 
               {/* <!-- Menu Item Departement --> */}
+              {/* Dashboard {open ? '▲' : '▼'} */}
               <li>
+                {/* <SidebarLinkGroup 
+                  activeCondition={false}
+                  onClose={closeAllDropdowns}
+                >
+                  {(handleClick, open) => (
+                    <>
+                      <NavLink
+                        to="/departements"
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
+                          pathname.includes('departements') &&
+                          'bg-[#2563eb] dark:bg-meta-4'
+                        }`}
+                        onClick={handleClick}
+                      >
+                        <SwatchIcon className="h-6 w-6 text-[#f5e685]" />
+                        Departements
+                        { open ? 
+                          <ChevronUpIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
+                          : 
+                          <ChevronDownIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />
+                        }
+                                       
+                      </NavLink>
+                      <div className={`transition-all pl-2 pr-4 hover:cursor-pointer py-1 duration-300 ease-in-out overflow-y-auto scroll-custom ${
+                        open ? 'max-h-50 opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
+                        {dept.map((item) => (
+                          <div key={item.id} onClick={() => handleSubItemClick(item.id)} className={`${activeSubMenu == item.id ? "bg-sky-700" : ""} py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 rounded-sm pl-2`}>
+                            <div className='flex flex-row justify-between'>
+                              {item.name} <ChevronRightIcon className="h-6 w-6 text-gray-500 fill-current" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </SidebarLinkGroup> */}
+
                 <NavLink
                   to="/departements"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
@@ -147,11 +244,41 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   }`}
                 >
                   <SwatchIcon className="h-6 w-6 text-[#f5e685]" />
-                  Departements
-                  <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
+                    Departements
+                  <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />            
                 </NavLink>
               </li>
               {/* <!-- Menu Item departement --> */}
+
+              {/* <!-- Menu Item specialities --> */}
+              <li>
+                <NavLink
+                  to="/specialites"
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
+                    pathname.includes('specialites') && 'bg-[#2563eb] dark:bg-meta-4'
+                  }`}
+                >
+                  <AdjustmentsHorizontalIcon className="h-6 w-6 text-[#f5e685]" />
+                  Spécialités
+                  <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
+                </NavLink>
+              </li>
+              {/* <!-- Menu Item specialities --> */}
+
+              {/* <!-- Menu Item Cours --> */}
+              <li>
+                <NavLink
+                  to="/cours"
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
+                    pathname.includes('cours') && 'bg-[#2563eb] dark:bg-meta-4'
+                  }`}
+                >
+                  <BookOpenIcon className="h-6 w-6 text-[#f5e685]" />
+                  Cours
+                  <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
+                </NavLink>
+              </li>
+              {/* <!-- Menu Item Cours --> */}
 
               {/* <!-- Menu Item enseignant --> */}
               <li>
@@ -182,9 +309,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </NavLink>
               </li>
               {/* <!-- Menu Item etudiants --> */}
+
+              {/* <!-- Menu Item etudiants --> */}
+              <HassAccess role={user?.status} allowedRoles={["Etudiant"]}>
+                <li>
+                  <NavLink
+                    to="/enrollments"
+                    className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
+                      pathname.includes('enrollments') && 'bg-[#2563eb] dark:bg-meta-4'
+                    }`}
+                  >
+                  <BookmarkIcon className="h-6 w-6 text-[#f5e685]" />
+                    Mes cours suivi
+                    <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
+                  </NavLink>
+                </li>
+              </HassAccess>
+              {/* <!-- Menu Item etudiants --> */}
               
               {/* <!-- Menu Item rapport --> */}
-              <li>
+              {/* <li>
                 <NavLink
                   to="/rapport"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
@@ -195,7 +339,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   Rapport d'activité
                   <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
                 </NavLink>
-              </li>
+              </li> */}
               {/* <!-- Menu Item rapport --> */}
             </ul>
           </div>

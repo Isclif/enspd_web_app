@@ -44,29 +44,52 @@ const Etudiants = () => {
     { name: "telephone", label: "Téléphone", type: "tel", placeholder: "Entrez le téléphone", value: "" },
   ]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `${URLS.API_BACK}/list-etudiants/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
-          {
-            method: "GET",
-            headers: headersList,
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Erreur lors de la récupération des données");
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        `${URLS.API_BACK}/etudiants/?page=${page}&username=${searchTerm.username}&matricule=${searchTerm.matricule}&speciality=${searchTerm.speciality}`,
+        {
+          method: "GET",
+          headers: headersList,
         }
-        const data = await response.json();
-        setData(data);
-        // setTotalPages(data.total_pages);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données:", error);
+      );
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des données");
       }
-    };
+      const data = await response.json();
+      setData(data);
+      // setTotalPages(data.total_pages);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données:", error);
+    }
+  };
 
+  const filterDataTable = () => {
+    let dataTableFiltered = data?.filter((item) =>
+      (searchTerm.username && item.username.toLowerCase().includes(searchTerm.username.toLowerCase())) ||
+      (searchTerm.matricule && item.matricule.toLowerCase().includes(searchTerm.matricule.toLowerCase())) ||
+      (searchTerm.speciality && item.speciality.toLowerCase().includes(searchTerm.speciality.toLowerCase()))
+    )
+
+    if(dataTableFiltered.length === 0){
+      fetchData()
+    } else {
+      setData(dataTableFiltered)
+    }
+
+
+    // console.log("dataTableFiltered", dataTableFiltered);
+    
+  }
+
+  useEffect(() => {
     fetchData();
-  }, [searchTerm, page, token]);
+  }, []);
+// }, [searchTerm, page, token]);
+
+  useEffect(() => {
+    filterDataTable();
+  }, [searchTerm]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm({
@@ -90,65 +113,74 @@ const Etudiants = () => {
     console.log("Données soumises:", data);
   };
 
+  const handleEdit = (id: number) => {
+    const item = data.find((item) => item.id === id);
+    // if (item) {
+    //   setSelectedItem(item);
+    // }
+    console.log("Clicked !!");
+  };
+
   return (
     <>
       <Breadcrumb pageName="Liste des étudiants" />
 
       {/* Section Gestion des étudiants */}
-      <SectionHeader title="Gestion des Etudiants" onAddClick={() => setShowModal(true)} />
+      {/* <SectionHeader title="Gestion des Etudiants" onAddClick={() => setShowModal(true)} /> */}
 
       {/* Modal dynamique */}
-      <ModalForm
+      {/* <ModalForm
         showModal={showModal}
         setShowModal={setShowModal}
         onSubmit={handleFormSubmit}
         title="Ajouter un étudiant"
         fields={fields}
-      />
+      /> */}
 
       {/* Liste des étudiants */}
       <div className="w-full bg-white dark:bg-gray-800 dark:bg-boxdark shadow-md rounded-lg p-5 mb-6">
-        <h3 className="text-xl font-semibold text-center mb-4">Liste des étudiants</h3>
-
+      <h3 className="text-md">Recherche</h3>
         {/* Formulaire de recherche sous le tableau des étudiants */}
-        <div className="w-full dark:bg-gray-800 rounded-lg p-5 mb-6">
-          <div className="flex gap-2 justify-between">
-            {/* Champs de recherche */}
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={searchTerm.username}
-              onChange={handleSearchChange}
-              className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
-            />
-            <input
-              type="text"
-              name="matricule"
-              placeholder="Matricule"
-              value={searchTerm.matricule}
-              onChange={handleSearchChange}
-              className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
-            />
-            <input
-              type="text"
-              name="speciality"
-              placeholder="Spécialité"
-              value={searchTerm.speciality}
-              onChange={handleSearchChange}
-              className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
-            />
-            {/* Bouton Rechercher */}
-            <button
-              onClick={handleSearch}
-              className="ml-1 px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-400 transition"
-            >
-              Rechercher
-            </button>
+        <div className="w-auto dark:bg-gray-800 rounded-lg pt-2 mb-6">
+          <div className="flex">
+            <div className="flex gap-2 justify-between">
+              {/* Champs de recherche */}
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={searchTerm.username}
+                onChange={handleSearchChange}
+                className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
+              />
+              <input
+                type="text"
+                name="matricule"
+                placeholder="Matricule"
+                value={searchTerm.matricule}
+                onChange={handleSearchChange}
+                className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
+              />
+              <input
+                type="text"
+                name="speciality"
+                placeholder="Spécialité"
+                value={searchTerm.speciality}
+                onChange={handleSearchChange}
+                className="px-4 py-2 rounded-lg border border-stroke shadow-default w-1/3 dark:bg-boxdark"
+              />
+              {/* Bouton Rechercher */}
+              <button
+                onClick={filterDataTable}
+                className="ml-1 px-2 py-2 bg-blue-700 text-white  rounded-lg hover:bg-blue-900 transition"
+              >
+                Rechercher
+              </button>
+            </div>
           </div>
         </div>
 
-        <DataTable data={data} />
+        <DataTable data={data} onEdit={handleEdit} />
 
         {/* Pagination */}
         <div className="mt-6">

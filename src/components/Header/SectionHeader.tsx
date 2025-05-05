@@ -1,6 +1,8 @@
 import React from "react";
 import { Plus, X } from "lucide-react";
 
+import { PlusCircleIcon } from "@heroicons/react/24/solid";
+
 interface SectionHeaderProps {
   title: string;
   onAddClick: () => void;
@@ -8,15 +10,15 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onAddClick }) => {
   return (
-    <div className="w-full bg-[#0c2461] text-white p-3 rounded-lg mb-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold mx-auto">{title}</h2>
-        <div className="flex gap-3 ml-auto">
-          <button className="flex gap-2 px-4 py-1 text-white font-semibold rounded-lg hover:bg-gray-200 transition">
-            Supprimer <X size={30} className="text-yellow-500" />
-          </button>
-          <button className="flex gap-2 px-4 py-1 text-white font-semibold rounded-lg hover:bg-gray-200 transition" onClick={onAddClick} >
-            Ajouter <Plus size={30} className="text-yellow-500" />
+    <div className="w-full text-white rounded-md mb-4">
+      <div className="flex items-center">
+        {/* <h2 className="text-md font-semibold mx-auto">{title}</h2> */}
+        <div className="ml-auto">
+          <button className="ml-1 px-2 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-400 transition" onClick={onAddClick} >
+            <div className="flex space-x-1">
+              <span className="text-md">Ajouter</span> 
+              <PlusCircleIcon className="h-6 z-6" />
+            </div>
           </button>
         </div>
       </div>
