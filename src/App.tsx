@@ -31,6 +31,13 @@ import CoursDetails from './pages/Cours/CoursDetails';
 import CoursContentView from './pages/Cours/CoursContentView';
 import Enrollments from './pages/Enrollments/Enrollments';
 
+import EvaluationsModule, { EvaluationContainer } from './pages/EvaluationsModule';
+
+
+
+
+
+
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
@@ -47,6 +54,8 @@ function App() {
   if(!getToken()){
     return <GuestLayout />
   }
+
+
 
   return loading ? (
     <Loader />
@@ -147,6 +156,19 @@ function App() {
               </>
             }
           />
+             <Route
+  path="/examens/*"
+  element={
+    <>
+      <PageTitle title="modules evaluations" />
+      <EvaluationContainer />
+    </>
+  }
+/>
+
+
+
+           
           <Route
           path="/profile"
           element={
@@ -192,6 +214,9 @@ function App() {
             </>
           }
         />
+
+
+          
           {/* <Route
             path="/ui/alerts"
             element={
@@ -237,6 +262,7 @@ function App() {
           />
         </Routes>
       </DefaultLayout>
+      {/* <RoleTest/> */}
     </div>
   );
 }

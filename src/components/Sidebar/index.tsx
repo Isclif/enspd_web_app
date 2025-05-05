@@ -116,6 +116,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     }
   }, [sidebarExpanded]);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <aside
       ref={sidebar}
@@ -247,6 +249,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     Departements
                   <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />            
                 </NavLink>
+
+                
               </li>
               {/* <!-- Menu Item departement --> */}
 
@@ -282,16 +286,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
               {/* <!-- Menu Item enseignant --> */}
               <li>
-                <NavLink
-                  to="/enseignants"
-                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
-                    pathname.includes('enseignants') && 'bg-[#2563eb] dark:bg-meta-4'
-                  }`}
-                >
-                  <UsersIcon className="h-6 w-6 text-[#f5e685]" />
-                  Enseignants
-                  <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
-                </NavLink>
+              
               </li>
               {/* <!-- Menu Item enseignant --> */}
 
@@ -341,6 +336,23 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 </NavLink>
               </li> */}
               {/* <!-- Menu Item rapport --> */}
+              
+              {/* <!-- Evaluation --> */}
+              <li>
+                <NavLink
+                  to="/examens"
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:text-yellow-100 dark:hover:bg-meta-4 ${
+                    pathname.includes('departements') &&
+                    'bg-[#2563eb] dark:bg-meta-4'
+                  }`}
+                >
+                  <SwatchIcon className="h-6 w-6 text-[#f5e685]" />
+                  Evaluations
+                  <ChevronRightIcon className="h-6 w-6 text-gray-500 absolute right-4 top-1/2 -translate-y-1/2 fill-current" />               
+                </NavLink>
+                
+              </li>
+              {/* <!-- end evaluation --> */}
             </ul>
           </div>
         </nav>
