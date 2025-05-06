@@ -4,6 +4,7 @@ import ClickOutside from '../ClickOutside';
 import UserOne from '../../images/user/user-01.png';
 import userAdmin from '../../images/img/user/student_logo.png'
 import AuthUser from '../AuthUser/AuthUser';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 
 const DropdownUser = () => {
   const {token, logout, user} = AuthUser();
@@ -58,14 +59,10 @@ const DropdownUser = () => {
             <li>
               <Link
                 to="/profile"
-                className="flex items-center gap-3.5 text-sm font-medium hover:text-primary lg:text-base"
+                className="flex w-28 items-center text-sm font-medium hover:text-primary lg:text-base space-x-2"
               >
-                <svg width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M11 9.62C8.42 9.62 6.36 7.59 6.36 5.12C6.36 2.64 8.42 0.61 11 0.61C13.57 0.61 15.64 2.64 15.64 5.12C15.64 7.59 13.57 9.62 11 9.62ZM11 2.16C9.28 2.16 7.9 3.5 7.9 5.12C7.9 6.73 9.28 8.07 11 8.07C12.71 8.07 14.09 6.73 14.09 5.12C14.09 3.5 12.71 2.16 11 2.16Z"
-                  />
-                </svg>
-                Mon Profil
+                <UserCircleIcon className="h-6 w-6 text-gray-500" />
+                <span>Mon Profil</span>
               </Link>
             </li>
           </ul>
@@ -73,7 +70,7 @@ const DropdownUser = () => {
           {/* Déconnexion */}
           <button
             onClick={disConnect}
-            className="block px-6 py-3 text-left text-sm font-medium text-red-600 hover:text-red-800"
+            className="block py-3 text-center text-sm font-medium text-red-400 hover:text-red-600"
           >
             Déconnexion
           </button>

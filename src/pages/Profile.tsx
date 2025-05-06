@@ -2,9 +2,11 @@ import React, { useState, useRef } from "react";
 import { CameraIcon, PencilSquareIcon, PrinterIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import AuthUser from "../components/AuthUser/AuthUser";
 
+import userProfile from "../images/img/user/student_logo.png"
+
 const Profile = () => {
   const { user } = AuthUser();
-  const [profilePic, setProfilePic] = useState(user.profile_picture || "https://via.placeholder.com/150");
+  const [profilePic, setProfilePic] = useState(userProfile);
   const [editMode, setEditMode] = useState(false);
   const fileInputRef = useRef(null);
   const profileRef = useRef(null);
@@ -55,7 +57,7 @@ const Profile = () => {
           <img 
             src={profilePic} 
             alt="Profile" 
-            className="w-32 h-32 rounded-full border-4 border-gray-300 object-cover" 
+            className="w-32 h-32 rounded-full border-4 border-blue-700 object-cover" 
           />
           
           {/* Icône Caméra pour changer l'image */}
@@ -110,7 +112,7 @@ const Profile = () => {
             </button>
           </div>
         ) : (
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-2 space-y-2 border border-green-2 rounded-md p-2">
             {fields.map((field) => (
               <li key={field.name}>
                 <strong>{field.label} :</strong> {field.value || "Non spécifié"}
@@ -123,12 +125,12 @@ const Profile = () => {
       {/* Boutons Imprimer & Télécharger */}
       <div className="flex justify-center space-x-6 mt-6">
         {/* Bouton Imprimer */}
-        <button 
+        {/* <button 
           onClick={handlePrint} 
           className="flex items-center bg-red-600 text-white font-semibold px-5 py-3 rounded-lg shadow-md hover:bg-red-700 transition"
         >
           <PrinterIcon className="w-6 h-6 mr-2" /> Imprimer
-        </button>
+        </button> */}
 
         {/* Bouton Télécharger */}
         <button 
