@@ -108,10 +108,10 @@ export const EvaluationList: React.FC<EvaluationListProps> = ({
     return (
       <EvaluationDetails 
         evaluation={selectedEvaluation}
-        onEdit={userRole === 'professeur' ? handleEdit : undefined}
-        onDelete={userRole === 'professeur' ? handleDelete : undefined}
+        onEdit={userRole === 'Professeur' ? handleEdit : undefined}
+        onDelete={userRole === 'Professeur' ? handleDelete : undefined}
         onBack={handleBack}
-        onRespond={userRole === 'etudiant' && onRespond ? () => onRespond(selectedEvaluation.id) : undefined}
+        onRespond={userRole === 'Etudiant' && onRespond ? () => onRespond(selectedEvaluation.id) : undefined}
       />
     );
   }
@@ -252,7 +252,7 @@ export const EvaluationList: React.FC<EvaluationListProps> = ({
                       >
                         Voir détails
                       </button>
-                      {userRole === 'professeur' && (
+                      {userRole === 'Professeur' && (
                         <>
                           <button
                             className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 font-medium"
@@ -268,7 +268,7 @@ export const EvaluationList: React.FC<EvaluationListProps> = ({
                           </button>
                         </>
                       )}
-                      {userRole === 'etudiant' && onRespond && new Date(evaluation.dateLimit) > today && (
+                      {userRole === 'Etudiant' && onRespond && new Date(evaluation.dateLimit) > today && (
                         <button
                           className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium"
                           onClick={() => onRespond(evaluation.id)}

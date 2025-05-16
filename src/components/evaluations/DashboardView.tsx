@@ -16,6 +16,7 @@ interface DashboardViewProps {
   onTakeEvaluation?: (id: string) => void; // Nouvelle prop pour répondre à l'évaluation
   onViewResults?: (id: string) => void; // Nouvelle prop pour voir les résultats
   completedEvaluationIds?: string[]; // Liste des évaluations complétées par l'étudiant
+  currentUser: {};
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ 
@@ -28,6 +29,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onDeleteEvaluation,
   onTakeEvaluation,
   onViewResults,
+  currentUser,
   completedEvaluationIds = []
 }) => {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'all'>('all');
@@ -35,8 +37,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   
   const today = new Date();
   
-  const upcomingEvaluations = evaluations.filter(e => new Date(e.dateLimit) > today);
-  const pastEvaluations = evaluations.filter(e => new Date(e.dateLimit) <= today);
+  const upcomingEvaluations = evaluations.filter(e => new Date(e.date_line) > today);
+  // const pastEvaluations = evaluations.filter(e => new Date(e.date_line) <= today);
+  const pastEvaluations = userRole === "Professeur" ? evaluations.filter(e => new Date(e.date_line) <= today) : evaluations.filter(e => e?.evaluation_results.find(ue=>ue?.student === currentUser?.id)?.completed === true);
   
   const getFilteredEvaluations = () => {
     let filtered = evaluations;
@@ -52,7 +55,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(e => 
-        e.titre.toLowerCase().includes(term) || 
+        e.title.toLowerCase().includes(term) || 
         e.description.toLowerCase().includes(term)
       );
     }
@@ -66,15 +69,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'dd MMMM yyyy', { locale: fr });
   };
+
+  // const allEvaluationsUser = 
   
   // Calculer les statistiques
   const stats = {
     total: evaluations.length,
     upcoming: upcomingEvaluations.length,
     past: pastEvaluations.length,
-    completionRate: userRole === 'etudiant' 
-      ? completedEvaluationIds.length > 0 
-        ? Math.round((completedEvaluationIds.length / evaluations.length) * 100) 
+    completionRate: userRole === 'Etudiant' 
+      ? pastEvaluations.length > 0 
+        ? Math.round((pastEvaluations.length / evaluations.length) * 100) 
         : 0
       : evaluations.length > 0 
         ? Math.round((pastEvaluations.length / evaluations.length) * 100) 
@@ -115,7 +120,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Tableau de bord</h2>
-          {userRole === 'professeur' && (
+          {userRole === 'Professeur' && (
             <Button 
               variant="primary"
               onClick={onCreateClick}
@@ -130,7 +135,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <h3 className="font-bold text-blue-800">Total</h3>
             <p className="text-2xl font-bold">{stats.total}</p>
             <p className="text-gray-600">
-              {userRole === 'etudiant' ? 'Évaluations disponibles' : 'Évaluations créées'}
+              {userRole === 'Etudiant' ? 'Évaluations disponibles' : 'Évaluations créées'}
             </p>
           </div>
           
@@ -150,7 +155,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <h3 className="font-bold text-purple-800">Taux de complétion</h3>
             <p className="text-2xl font-bold">{stats.completionRate}%</p>
             <p className="text-gray-600">
-              {userRole === 'etudiant' ? 'Évaluations complétées' : 'Évaluations terminées'}
+              {userRole === 'Etudiant' ? 'Évaluations complétées' : 'Évaluations terminées'}
             </p>
           </div>
         </div>
@@ -160,7 +165,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="bg-white p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">
-            {userRole === 'etudiant' ? 'Mes évaluations à passer' : 'Mes évaluations'}
+            {userRole === 'Etudiant' ? 'Mes évaluations à passées' : 'Mes évaluations'}
           </h2>
           <div className="relative">
             <input
@@ -212,7 +217,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {filteredEvaluations.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
             <p className="text-gray-500">Aucune évaluation trouvée</p>
-            {userRole === 'professeur' && (
+            {userRole === 'Professeur' && (
               <Button
                 variant="primary"
                 onClick={onCreateClick}
@@ -232,17 +237,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div className="flex justify-between">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-lg">{evaluation.titre}</h3>
+                      <h3 className="font-semibold text-lg">{evaluation.title}</h3>
                       <span className={`text-xs px-2 py-1 rounded-full ${getBadgeColor(evaluation.type)}`}>
                         {evaluation.type === 'qcm' ? 'QCM' : 
                         evaluation.type === 'redaction' ? 'Rédaction' : 'Vrai/Faux'}
                       </span>
-                      {isDeadlineApproaching(evaluation.dateLimit) && (
+                      {isDeadlineApproaching(evaluation.date_line) && (
                         <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">
                           Échéance proche
                         </span>
                       )}
-                      {userRole === 'etudiant' && isEvaluationCompleted(evaluation.id) && (
+                      {userRole === 'Etudiant' && isEvaluationCompleted(evaluation.id) && (
                         <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
                           Complétée
                         </span>
@@ -250,26 +255,32 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </div>
                     <p className="text-gray-600 mt-1">{evaluation.description.substring(0, 100)}...</p>
                     <div className="mt-2 flex items-center text-sm text-gray-500">
-                      <span>Date limite: {formatDate(evaluation.dateLimit)}</span>
+                      <span>Date limite: {formatDate(evaluation.date_line)}</span>
                       <span className="mx-2">•</span>
                       <span>{evaluation.questions.length} question{evaluation.questions.length > 1 ? 's' : ''}</span>
                     </div>
                   </div>
                   <div className="flex space-x-2 items-start">
                     {/* Boutons adaptés selon le rôle utilisateur */}
-                    {userRole === 'etudiant' ? (
+                    {userRole === 'Etudiant' ? (
                       <>
                         {isEvaluationCompleted(evaluation.id) ? (
                           // Si l'évaluation est complétée, afficher les résultats
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => onViewResults && onViewResults(evaluation.id)}
-                          >
-                            Voir résultats
-                          </Button>
-                        ) : canTakeEvaluation(evaluation.dateLimit) ? (
+                          // <Button
+                          //   variant="secondary"
+                          //   size="sm"
+                          //   onClick={() => onViewResults && onViewResults(evaluation.id)}
+                          // >
+                          //   Voir résultats
+                          // </Button>
+                          ""
+                        ) : canTakeEvaluation(evaluation.date_line) ? (
                           // Si la date limite n'est pas dépassée, permettre de répondre
+                          (
+                            evaluation?.evaluation_results?.length === 0 ||
+                            !evaluation.evaluation_results?.some(ue => ue?.student === currentUser?.id) ||
+                            evaluation.evaluation_results?.find(ue => ue?.student === currentUser?.id)?.completed === false
+                          ) ?
                           <Button
                             variant="primary"
                             size="sm"
@@ -277,18 +288,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                           >
                             Répondre
                           </Button>
+                          :
+                          <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => onViewResults && onViewResults(evaluation.id)}
+                        >
+                          Voir résultats
+                        </Button>
                         ) : (
                           // Si la date limite est dépassée, désactiver le bouton
                           <Button
-                            variant="outline"
+                            variant=""
                             size="sm"
                             disabled
+                            className='text-red-500'
                           >
                             Expirée
                           </Button>
                         )}
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
                           onClick={() => onViewEvaluation(evaluation.id)}
                         >
@@ -296,29 +316,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </Button>
                       </>
                     ) : (
-                      // Interface pour les professeurs
+                      // Interface pour les professeurs et les admins
                       <>
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
                           onClick={() => onViewEvaluation(evaluation.id)}
                         >
                           Voir
                         </Button>
-                        <Button
-                          variant="secondary"
+                        {/* <Button
+                          variant="primary"
                           size="sm"
                           onClick={() => onEditEvaluation && onEditEvaluation(evaluation.id)}
                         >
                           Modifier
-                        </Button>
-                        <Button
+                        </Button> */}
+                        {/* <Button
                           variant="danger"
                           size="sm"
                           onClick={() => onDeleteEvaluation && onDeleteEvaluation(evaluation.id)}
                         >
                           Supprimer
-                        </Button>
+                        </Button> */}
                       </>
                     )}
                   </div>

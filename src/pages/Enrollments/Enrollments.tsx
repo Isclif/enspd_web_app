@@ -34,7 +34,7 @@ const Enrollments = () => {
     // console.log("user", user);
     
     let headersList = {
-    "Authorization": `Bearer ${token}` 
+        "Authorization": `Bearer ${token}` 
     }
 
     const [data, setData] = useState<DataItem[]>([]);

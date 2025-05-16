@@ -3,58 +3,98 @@ import { Button } from '../common/Button';
 import { Evaluation, Question, Response, QuestionType } from '../../types/evaluations';
 
 interface EvaluationResponseProps {
-  evaluation: Evaluation;
+  evaluation: any;
   onSubmit: (responses: Response[]) => void;
   onCancel: () => void;
+  updateDuration: (id: string, duration: string) => void;
+  selectedTakenEvalResultId: string;
+  // createTakeEval: (data: {}) => void,
+  currentUser: any;
+  onFinish: () => void;
+}
+
+export interface TakenEvaluation {
+  evaluation: string;
+  score: number; 
+  completed: string;
+  duration: string;
 }
 
 export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({ 
   evaluation, 
   onSubmit, 
-  onCancel 
+  onCancel,
+  updateDuration,
+  selectedTakenEvalResultId,
+  // createTakeEval,
+  currentUser,
+  onFinish
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState<Response[]>([]);
-  const [timeLeft, setTimeLeft] = useState<number | null>(
-    evaluation.duree ? evaluation.duree * 60 : null
-  );
+
+
+
+  const parseTimeStringToSeconds = (timeString: string): number => {
+    const [hours, minutes, seconds] = timeString.split(':').map(Number);
+    return hours * 3600 + minutes * 60 + seconds;
+  };
+
+  // console.log("evaluation", evaluation);
+  
+  
+  const formatSecondsToTime = (totalSeconds: number): string => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
   
   // Initialiser les réponses vides
   useEffect(() => {
-    const initialResponses = evaluation.questions.map(question => ({
+    const initialResponses = evaluation?.questions?.map(question => ({
       questionId: question.id,
       evaluationId: evaluation.id,
+      resultId: evaluation.evaluation_results.filter((el)=>(el.student === currentUser.id))[0]?.id,
       responseContent: question.type === 'qcm' ? [] : '',
       isCorrect: false,
       score: 0
     }));
     
     setResponses(initialResponses);
+
+    // createTakeEval({
+    //   evaluation: evaluation?.id,
+    //   score: 0,
+    //   // completed: false,
+    //   duration: evaluation?.duration
+    // })
   }, [evaluation]);
-  
-  // Décompte du temps si une durée est définie
+
+  const userEvaluation = evaluation?.evaluation_results?.filter((el)=>(el?.student === currentUser.id))[0]
+
+  const [timeLeft, setTimeLeft] = useState<number>(() => parseTimeStringToSeconds(userEvaluation?.duration || evaluation?.duration));
+
+
   useEffect(() => {
     if (timeLeft === null) return;
-    
-    const timer = setInterval(() => {
+
+    const interval = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev === null || prev <= 0) {
-          clearInterval(timer);
+        if (prev <= 1) {
+          clearInterval(interval);
           handleSubmit();
+          onFinish()
           return 0;
         }
+        updateDuration(selectedTakenEvalResultId, formatSecondsToTime(prev - 1))
+        
         return prev - 1;
       });
     }, 1000);
-    
-    return () => clearInterval(timer);
-  }, [timeLeft]);
-  
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  };
+
+    return () => clearInterval(interval);
+  }, [timeLeft, selectedTakenEvalResultId]);
   
   const handleResponseChange = (questionIndex: number, value: string | string[]) => {
     setResponses(prev => {
@@ -63,6 +103,9 @@ export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({
         ...newResponses[questionIndex],
         responseContent: value
       };
+
+      console.log("newResponses", newResponses);
+      
       return newResponses;
     });
   };
@@ -70,15 +113,20 @@ export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({
   const handleSubmit = () => {
     onSubmit(responses);
   };
+
+  // const userEvaluation = evaluation.evaluation_results.filter((el)=>(el.student === currentUser.id))[0]
+
+  // console.log("userEvaluation", userEvaluation);
   
-  const currentQuestion = evaluation.questions[currentStep];
+  
+  const currentQuestion = userEvaluation?.evaluation?.questions[currentStep];
   
   const renderQuestionContent = (question: Question, index: number) => {
-    switch (question.type) {
+    switch (question?.type) {
       case 'qcm':
         return (
           <div className="space-y-3">
-            {question.options?.map((option, optIndex) => (
+            {question?.options?.map((option, optIndex) => (
               <div key={optIndex} className="flex items-center">
                 <input
                   type="checkbox"
@@ -104,7 +152,7 @@ export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({
                   className="h-5 w-5 text-blue-600"
                 />
                 <label htmlFor={`option-${optIndex}`} className="ml-2 text-gray-700">
-                  {option}
+                  {option?.text}
                 </label>
               </div>
             ))}
@@ -164,10 +212,10 @@ export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({
     <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
       {/* En-tête */}
       <div className="flex justify-between items-center mb-6 border-b pb-4">
-        <h2 className="text-xl font-bold">{evaluation.titre}</h2>
+        <h2 className="text-xl font-bold">{evaluation.title}</h2>
         {timeLeft !== null && (
-          <div className={`font-mono text-lg ${timeLeft < 60 ? 'text-red-600' : 'text-gray-700'}`}>
-            Temps restant: {formatTime(timeLeft)}
+          <div className={`font-mono text-lg ${timeLeft < 60 ? 'text-red-600' : 'text-zinc-700'}`}>
+            Temps restant: {formatSecondsToTime(timeLeft)}
           </div>
         )}
       </div>
@@ -190,21 +238,21 @@ export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({
       <div className="mb-6">
         <div className="flex space-x-2 mb-2">
           <span className={`text-xs px-2 py-1 rounded-full ${
-            currentQuestion.type === 'qcm' ? 'bg-blue-100 text-blue-800' :
-            currentQuestion.type === 'redaction' ? 'bg-green-100 text-green-800' :
+            currentQuestion?.type === 'qcm' ? 'bg-blue-100 text-blue-800' :
+            currentQuestion?.type === 'redaction' ? 'bg-green-100 text-green-800' :
             'bg-purple-100 text-purple-800'
           }`}>
-            {currentQuestion.type === 'qcm' ? 'QCM' : 
-             currentQuestion.type === 'redaction' ? 'Rédaction' : 'Vrai/Faux'}
+            {currentQuestion?.type === 'qcm' ? 'QCM' : 
+             currentQuestion?.type === 'redaction' ? 'Rédaction' : 'Vrai/Faux'}
           </span>
-          {currentQuestion.points && (
+          {currentQuestion?.points && (
             <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800">
-              {currentQuestion.points} point{currentQuestion.points > 1 ? 's' : ''}
+              {currentQuestion?.points} point{currentQuestion?.points > 1 ? 's' : ''}
             </span>
           )}
         </div>
         
-        <h3 className="text-lg font-medium mb-4">{currentQuestion.content}</h3>
+        <h3 className="text-lg font-medium mb-4">{currentQuestion?.content}</h3>
         
         {renderQuestionContent(currentQuestion, currentStep)}
       </div>
@@ -212,7 +260,7 @@ export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({
       {/* Navigation */}
       <div className="flex justify-between pt-4 border-t">
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={() => {
             if (currentStep > 0) {
               setCurrentStep(currentStep - 1);
@@ -233,12 +281,16 @@ export const EvaluationResponse: React.FC<EvaluationResponseProps> = ({
               Suivant
             </Button>
           ) : (
-            <Button
+            responses[0]?.responseContent?.length ? (
+              <Button
               variant="primary"
               onClick={handleSubmit}
             >
               Terminer l'évaluation
             </Button>
+            ) 
+            :
+             ""
           )}
         </div>
       </div>

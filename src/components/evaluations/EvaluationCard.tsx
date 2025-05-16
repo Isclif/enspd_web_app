@@ -34,12 +34,12 @@ export const EvaluationCard: React.FC<EvaluationCardProps> = ({
             {typeLabels[evaluation.type]}
           </span>
           <p className="text-sm text-gray-500 mt-1">
-            Date limite: {new Date(evaluation.dateLimit).toLocaleDateString()}
+            Date limite: {new Date(evaluation.date_line).toLocaleDateString()}
           </p>
         </div>
       </div>
       <div className="mt-4 flex justify-end">
-        {userRole === 'professeur' ? (
+        {userRole === 'Professeur' ? (
           <Button variant="primary" size="sm" onClick={() => onEdit && onEdit(evaluation.id)}>
             Modifier
           </Button>

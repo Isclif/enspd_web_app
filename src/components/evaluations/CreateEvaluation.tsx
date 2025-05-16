@@ -1,12 +1,20 @@
 // src/components/evaluations/CreateEvaluation.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 import { v4 as uuidv4 } from 'uuid';
+import { TimePicker } from 'antd';
+import type { Dayjs } from 'dayjs';
+// import "antd/dist/reset.css";
+
+import URLS from "../../js/ConfigUrl"
+import { useFetch } from "../../js/useFetch"
+
+import AuthUser from "../../components/AuthUser/AuthUser";
 
 // Types
-export type QuestionType = 'qcm' | 'redaction' | 'vrai_faux';
+export type QuestionType = 'qcm' | 'vrai_faux';
 
 export interface Option {
   id: string;
@@ -24,37 +32,91 @@ export interface Question {
 
 export interface Evaluation {
   id: string;
-  titre: string;
+  title: string;
   description: string;
   type: QuestionType;
-  dateLimit: string;
+  date_line: string;
   questions: Question[];
   createdAt: string;
+  duration: string;
+}
+
+export interface Courses {
+  id: string;
+  name: string;
 }
 
 interface CreateEvaluationProps {
-  onSubmit: (evaluation: Omit<Evaluation, 'id' | 'createdAt'>) => void;
+  onSubmit: (evaluation: Omit<Evaluation, 'id' | 'createdAt'>, course_id: string) => void;
 }
 
 export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) => {
+
+  const {token, user} = AuthUser()
+
+  const { handlePost, handleFetch } = useFetch()
+
+
   const [formData, setFormData] = useState<Omit<Evaluation, 'id' | 'createdAt'>>({
-    titre: '',
+    title: '',
     description: '',
     type: 'qcm',
-    dateLimit: '',
+    date_line: '',
+    duration: '',
     questions: []
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showQuestionForm, setShowQuestionForm] = useState<boolean>(false);
+
+  const [duration, setDuration] = useState<Dayjs | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [courses, setCourses] = useState<Courses[]>([]);
+  
+
+  let headersList = {
+    "Authorization": `Bearer ${token}` 
+  }
+
+  const fetchCourses = async () => {
+      try {
+          const response = await fetch(`${URLS.API_BACK}/courses/`, {
+              method: "GET",
+              headers: headersList
+          });
+          if (!response.ok) {
+              throw new Error('Erreur lors de la récupération des données');
+          }
+          const data: Courses[] = await response.json();
+          setCourses(data);
+      } catch (error) {
+          console.error('Erreur lors de la récupération des données:', error);
+      }
+  };
+
+  useEffect(()=>{
+    fetchCourses()
+  }, [])
+
+  const onChange = (time: Dayjs | null) => {
+    setDuration(time);
+
+    if (time) {
+      const timeStr = time.format('HH:mm:ss');
+      handleChange('duration', timeStr)
+      console.log('Heure sélectionnée :', timeStr);
+    } else {
+      handleChange('duration', '')
+    }
+  };
   
   // État pour la gestion des questions en cours d'édition
   const [currentQuestion, setCurrentQuestion] = useState<Question>({
     id: uuidv4(),
     text: '',
-    type: 'qcm',
+    type: '',
     options: [],
-    points: 1
+    points: 0
   });
   
   // État pour la nouvelle option en cours d'ajout
@@ -64,16 +126,24 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.titre.trim()) {
-      newErrors.titre = 'Le titre est requis';
+    if (!formData.title.trim()) {
+      newErrors.title = 'Le titre est requis';
+    }
+
+    if (!selectedCourse) {
+      newErrors.course = 'Le cours est requis';
     }
     
     if (!formData.description.trim()) {
       newErrors.description = 'La description est requise';
     }
     
-    if (!formData.dateLimit) {
-      newErrors.dateLimit = 'La date limite est requise';
+    if (!formData.date_line) {
+      newErrors.date_line = 'La date limite est requise';
+    }
+
+    if (!duration) {
+      newErrors.duration = 'La durée de l\'évaluation est requise';
     }
     
     if (formData.questions.length === 0) {
@@ -114,15 +184,16 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
     }
     
     if (validateForm()) {
-      onSubmit(formData);
+      onSubmit(formData, selectedCourse);
       
       // Réinitialiser le formulaire
       setFormData({
-        titre: '',
+        title: '',
         description: '',
         type: 'qcm',
-        dateLimit: '',
-        questions: []
+        date_line: '',
+        questions: [],
+        duration:''
       });
       resetQuestionForm();
     }
@@ -140,6 +211,9 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
       });
     }
   };
+
+  console.log("formData", formData);
+
   
   const handleQuestionChange = <K extends keyof typeof currentQuestion>(
     key: K, 
@@ -156,8 +230,8 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
             { id: uuidv4(), text: 'Vrai', isCorrect: false },
             { id: uuidv4(), text: 'Faux', isCorrect: false }
           ];
-        } else if (newType === 'redaction') {
-          updatedQuestion.options = [];
+        // } else if (newType === 'redaction') {
+        //   updatedQuestion.options = [];
         }
       }
       
@@ -235,9 +309,10 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
       setCurrentQuestion({
         id: uuidv4(),
         text: '',
-        type: formData.type, // Conserver le même type pour plus de rapidité
+        // type: formData.type, // Conserver le même type pour plus de rapidité
+        type: '', // Conserver le même type pour plus de rapidité
         options: [],
-        points: 1
+        points: 0
       });
     }
   };
@@ -267,7 +342,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
       text: '',
       type: formData.type,
       options: [],
-      points: 1
+      points: 0
     });
     setEditingQuestionIndex(null);
     setNewOption('');
@@ -288,12 +363,28 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
+          <div className="flex-none">
+            <label className="block text-gray-700 font-semibold mb-2">Cours</label>
+            <select 
+            name="course"
+            value={selectedCourse}
+            onChange={(e) => setSelectedCourse(e.target.value)}
+            className={`w-full px-2 py-2 border ${errors.course ? 'border-red-500' : 'border-zinc-500'} rounded focus:outline-none focus:ring-2 focus:ring-black`}
+            >
+              <option value="">Selectionnez le cours correspondant</option>
+              {courses?.map((elm) => (
+                  <option key={elm.id} value={elm.id}>{elm.name}</option>
+              ))}
+            </select>
+            {errors.course && <p className="text-red-500 text-sm mt-1">{errors.course}</p>}
+          </div>
+
           <Input 
             label="Titre"
-            value={formData.titre}
-            onChange={e => handleChange('titre', e.target.value)}
+            value={formData.title}
+            onChange={e => handleChange('title', e.target.value)}
             placeholder="Titre de l'évaluation"
-            error={errors.titre}
+            error={errors.title}
           />
           
           <div className="mb-4">
@@ -312,7 +403,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
             label="Type d'évaluation par défaut"
             options={[
               { value: 'qcm', label: 'QCM' },
-              { value: 'redaction', label: 'Rédaction' },
+              // { value: 'redaction', label: 'Rédaction' },
               { value: 'vrai_faux', label: 'Vrai/Faux' }
             ]}
             value={formData.type}
@@ -322,10 +413,30 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
           <Input 
             label="Date limite"
             type="date"
-            value={formData.dateLimit}
-            onChange={e => handleChange('dateLimit', e.target.value)}
-            error={errors.dateLimit}
+            value={formData.date_line}
+            onChange={e => handleChange('date_line', e.target.value)}
+            error={errors.date_line}
           />
+
+          {/* <Input 
+            label="Durée"
+            type="time"
+            value={formData.duration}
+            onChange={e => handleChange('duration', e.target.value)}
+            error={errors.duration}
+          /> */}
+          <div className=''>
+            <div className='block text-gray-700 font-semibold mb-2'>Durée</div>
+            <TimePicker 
+              value={duration} 
+              onChange={onChange} 
+              className={`w-full px-3 py-2 border ${errors.duration ? 'border-red-500' : 'border-zinc-500'}`} 
+              showNow={false} 
+              // use12Hours={false}
+            />
+            {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
+          </div>
+
         </div>
         
         <div className="border-t pt-6" id="question-section">
@@ -365,8 +476,9 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                 <Select 
                   label="Type de question"
                   options={[
+                    { value: '', label: 'Selectionnez le type de question' },
                     { value: 'qcm', label: 'QCM' },
-                    { value: 'redaction', label: 'Rédaction' },
+                    // { value: 'redaction', label: 'Rédaction' },
                     { value: 'vrai_faux', label: 'Vrai/Faux' }
                   ]}
                   value={currentQuestion.type}
@@ -377,10 +489,10 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                   <label className="block text-gray-700 font-semibold mb-2">Points</label>
                   <input 
                     type="number" 
-                    min="1" 
+                    min="0" 
                     className="w-full border border-gray-300 rounded px-3 py-2"
                     value={currentQuestion.points}
-                    onChange={e => handleQuestionChange('points', parseInt(e.target.value) || 1)}
+                    onChange={e => handleQuestionChange('points', parseInt(e.target.value))}
                   />
                 </div>
               </div>
@@ -436,12 +548,12 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                         className="flex-grow border border-gray-300 rounded px-3 py-2"
                         value={newOption}
                         onChange={e => setNewOption(e.target.value)}
-                        onKeyPress={handleKeyPress}
+                        onKeyDown={handleKeyPress}
                         placeholder="Nouvelle option (Appuyer sur Entrée pour ajouter)"
                       />
                       <Button 
                         type="button" 
-                        variant="secondary" 
+                        variant="primary" 
                         onClick={addOption}
                       >
                         Ajouter
@@ -454,7 +566,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
               <div className="flex justify-end space-x-2 mt-4">
                 <Button 
                   type="button" 
-                  variant="outline" 
+                  variant="danger" 
                   onClick={resetQuestionForm}
                 >
                   Annuler
@@ -514,11 +626,13 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                   <div className="flex items-center mb-2 text-sm text-gray-600">
                     <span className={`px-2 py-1 rounded mr-2 ${
                       question.type === 'qcm' ? 'bg-purple-100 text-purple-800' : 
-                      question.type === 'redaction' ? 'bg-yellow-100 text-yellow-800' : 
+                      // question.type === 'redaction' ? 'bg-yellow-100 text-yellow-800' : 
                       'bg-green-100 text-green-800'
                     }`}>
                       {question.type === 'qcm' ? 'QCM' : 
-                       question.type === 'redaction' ? 'Rédaction' : 'Vrai/Faux'}
+                      //  question.type === 'redaction' ? 'Rédaction' : 
+                       'Vrai/Faux'
+                      }
                     </span>
                     <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
                       {question.points} point{question.points > 1 ? 's' : ''}
@@ -568,7 +682,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
               </p>
             )}
           </div>
-          <Button type="submit" variant="primary" size="lg">
+          <Button type="submit" variant="primary">
             Créer l'évaluation
           </Button>
         </div>

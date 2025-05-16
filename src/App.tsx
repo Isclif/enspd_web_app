@@ -31,7 +31,7 @@ import CoursDetails from './pages/Cours/CoursDetails';
 import CoursContentView from './pages/Cours/CoursContentView';
 import Enrollments from './pages/Enrollments/Enrollments';
 
-import EvaluationsModule, { EvaluationContainer } from './pages/EvaluationsModule';
+import { EvaluationContainer } from './pages/EvaluationsModule';
 
 
 

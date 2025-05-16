@@ -1,6 +1,6 @@
 // types/evaluations.ts
 
-export type UserRole = 'etudiant' | 'professeur';
+export type UserRole = 'Etudiant' | 'Professeur' | 'Admin';
 
 export type QuestionType = 'qcm' | 'redaction' | 'vrai_faux';
 
@@ -43,8 +43,10 @@ export interface StudentEvaluation {
   evaluationId: string;
   studentId: string;
   status: 'pending' | 'in_progress' | 'completed';
+  completed: boolean;
   startedAt?: Date;
   submittedAt?: Date;
   score?: number;
-  responses: Response[];
+  responses: any;
+  submitted_at: Date;
 }

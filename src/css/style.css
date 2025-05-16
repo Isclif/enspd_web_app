@@ -30,6 +30,11 @@
   }
 }
 
+.ant-picker-ok button {
+  background-color: #1677ff;
+  color: white
+}
+
 /* third-party libraries CSS */
 
 .tableCheckbox:checked ~ div span {

@@ -58,19 +58,19 @@ const Specialities = () => {
     };
 
     const fetchData = async () => {
-    try {
-        const response = await fetch(`${URLS.API_BACK}/specialities/`, {
-            method: "GET",
-            headers: headersList
-        });
-        if (!response.ok) {
-            throw new Error('Erreur lors de la récupération des données');
+        try {
+            const response = await fetch(`${URLS.API_BACK}/specialities/`, {
+                method: "GET",
+                headers: headersList
+            });
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données');
+            }
+            const data = await response.json();
+            setData(data);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des données:', error);
         }
-        const data = await response.json();
-        setData(data);
-    } catch (error) {
-        console.error('Erreur lors de la récupération des données:', error);
-    }
     };
 
     const filterDataTable = () => {
@@ -170,10 +170,10 @@ const Specialities = () => {
                 <HassAccess role={user?.status} allowedRoles={["Admin"]}>
                     <div className="flex flex-row justify-center items-center mt-2">
                         <button className="ml-1 px-2 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-400 transition" onClick={() => setShowModal(true)} >
-                        <div className="flex space-x-1">
-                            <span className="text-md">Ajouter</span> 
-                            <PlusCircleIcon className="h-6 z-6" />
-                        </div>
+                            <div className="flex space-x-1">
+                                <span className="text-md">Ajouter</span> 
+                                <PlusCircleIcon className="h-6 z-6" />
+                            </div>
                         </button>
                     </div>
                 </HassAccess>

@@ -5,134 +5,112 @@ import { EvaluationResponse } from '../components/evaluations/EvaluationResponse
 import { EvaluationResults } from '../components/evaluations/EvaluationResults';
 import { StudentEvaluation, UserRole } from '../types/evaluations';
 import { CreateEvaluation, Evaluation } from '../components/evaluations/CreateEvaluation';
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
+import AuthUser from "../components/AuthUser/AuthUser";
+
+import URLS from "../js/ConfigUrl"
+import { useFetch } from "../js/useFetch"
+import { ResultsView } from '../components/evaluations/ResultsView';
+
+export interface TakenEvaluation {
+  evaluation: string;
+  score: number; 
+  completed: string;
+  duration: string;
+}
+
+export interface CurrentEvaluation {
+  id: string;
+  score: number; 
+  completed: boolean;
+  duration: string;
+  questions: any;
+  student: string;
+}
 
 // Ce composant serait normalement connecté à une API pour récupérer et sauvegarder les données
 export const EvaluationContainer: React.FC = () => {
+
+  const {token, user} = AuthUser()
+
+  const { handlePost, handleFetch, handlePatch } = useFetch()
+  
   // État pour suivre le mode d'affichage
-  const [mode, setMode] = useState<'dashboard' | 'view' | 'take' | 'results' | 'create'>('dashboard');
+  const [mode, setMode] = useState<'dashboard' | 'view' | 'take' | 'results' | 'create' | 'results_view'>('dashboard');
   
   // État pour l'utilisateur actuel (dans une vraie application, viendrait de l'authentification)
-  const [userRole, setUserRole] = useState<UserRole>('etudiant');
+  const [userRole, setUserRole] = useState<UserRole>(user?.status);
+
+  // console.log("user?.status", user?.status);
   
   // État pour les évaluations (simulé, viendrait normalement d'une API)
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+
+  // État pour les évaluations (simulé, viendrait normalement d'une API)
+  const [selectedEvaluationResponse, setSelectedEvaluationResponse] = useState<Evaluation | null>(null);  
   
   // Évaluation actuellement sélectionnée
-  const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null);
+  const [selectedEvaluation, setSelectedEvaluation] = useState<CurrentEvaluation | null>(null);
+
+  // État pour les évaluations (simulé, viendrait normalement d'une API)
+  const [takenEvaluations, setTakenEvaluations] = useState<CurrentEvaluation[]>([]);
+
+  // console.log("selectedEvaluation", selectedEvaluation);
+
   
   // Réponses de l'étudiant (simulé)
   const [studentEvaluations, setStudentEvaluations] = useState<StudentEvaluation[]>([]);
+
+  // Current taken evaluation
+  const [takenEvalResultId, setTakenEvalResultId] = useState<string>();
   
   // ID de l'étudiant actuel (simulé)
-  const currentStudentId = 'student123';
-  
-  // Charger les données simulées
-  useEffect(() => {
-    // Simuler le chargement des évaluations
-    // Dans une vraie application, cela ferait un appel API
-    const mockEvaluations: Evaluation[] = [
-      {
-        id: '1',
-        titre: 'Quiz sur les bases de React',
-        description: 'Évaluation des concepts fondamentaux de React',
-        type: 'qcm',
-        dateCreation: '2025-04-15',
-        dateLimit: '2025-05-15',
-        duree: 30,
-        auteurId: 'prof123',
-        pointsTotal: 20,
-        allowRetake: false,
-        showCorrectAnswers: true,
-        questions: [
-          {
-            id: 'q1',
-            type: 'qcm',
-            content: 'Quel hook permet de gérer l\'état local dans un composant fonctionnel ?',
-            options: ['useEffect', 'useState', 'useContext', 'useReducer'],
-            correctAnswer: ['useState'],
-            points: 2
-          },
-          {
-            id: 'q2',
-            type: 'vrai_faux',
-            content: 'React utilise un DOM virtuel pour optimiser les mises à jour.',
-            correctAnswer: 'vrai',
-            points: 1
-          },
-          {
-            id: 'q3',
-            type: 'redaction',
-            content: 'Expliquez la différence entre les composants à état et les composants sans état.',
-            correctAnswer: 'Les composants à état (stateful) gèrent leur propre état interne, tandis que les composants sans état (stateless) reçoivent uniquement des props.',
-            points: 5
+  const currentStudentId = user;
+
+  const [pendingEvaluationId, setPendingEvaluationId] = useState<number | null>(null);
+
+  // Charger les evaluations
+
+  let headersList = {
+    "Authorization": `Bearer ${token}` 
+  }
+
+  const fetchEvaluations = async () => {
+      try {
+          const response = await fetch(`${URLS.API_BACK}/evaluations/`, {
+              method: "GET",
+              headers: headersList
+          });
+          if (!response.ok) {
+              throw new Error('Erreur lors de la récupération des données');
           }
-        ]
-      },
-      {
-        id: '2',
-        titre: 'Evaluation sur les bases de données',
-        description: 'Test sur les concepts de base des bases de données relationnelles',
-        type: 'mixte',
-        dateCreation: '2025-04-10',
-        dateLimit: '2025-04-24',
-        duree: 45,
-        auteurId: 'prof123',
-        pointsTotal: 25,
-        allowRetake: true,
-        showCorrectAnswers: false,
-        questions: [
-          {
-            id: 'q1',
-            type: 'qcm',
-            content: 'Quels sont les types de jointures en SQL ?',
-            options: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN', 'CROSS JOIN'],
-            correctAnswer: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN', 'CROSS JOIN'],
-            points: 3
-          },
-          {
-            id: 'q2',
-            type: 'vrai_faux',
-            content: 'La normalisation diminue la redondance des données.',
-            correctAnswer: 'vrai',
-            points: 2
-          }
-        ]
+          const data: Evaluation[] = await response.json();
+          setEvaluations(data);
+      } catch (error) {
+          console.error('Erreur lors de la récupération des données:', error);
       }
-    ];
-    
-    setEvaluations(mockEvaluations);
-    
-    // Simuler les évaluations déjà complétées par l'étudiant
-    const mockStudentEvaluations: StudentEvaluation[] = [
-      {
-        evaluationId: '2',
-        studentId: currentStudentId,
-        status: 'completed',
-        startedAt: new Date('2025-04-22T14:30:00'),
-        submittedAt: new Date('2025-04-22T15:10:00'),
-        score: 20,
-        responses: [
-          {
-            questionId: 'q1',
-            evaluationId: '2',
-            responseContent: ['INNER JOIN', 'LEFT JOIN', 'FULL JOIN'],
-            isCorrect: false,
-            score: 2,
-            feedback: 'Réponse incomplète, manque RIGHT JOIN et CROSS JOIN'
-          },
-          {
-            questionId: 'q2',
-            evaluationId: '2',
-            responseContent: 'vrai',
-            isCorrect: true,
-            score: 2
-          }
-        ]
-      }
-    ];
-    
-    setStudentEvaluations(mockStudentEvaluations);
-  }, []);
+  };
+
+  const fetchEvaluationsResult = async () => {
+    try {
+        const response = await fetch(`${URLS.API_BACK}/student_results/`, {
+            method: "GET",
+            headers: headersList
+        });
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération des données');
+        }
+        const data: CurrentEvaluation[] = await response.json();
+        setTakenEvaluations(data);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des données:', error);
+    }
+  };
+
+  useEffect(()=>{
+    fetchEvaluations()
+    fetchEvaluationsResult()
+  }, [])
   
   // Obtenir la liste des IDs d'évaluations complétées
   const completedEvaluationIds = studentEvaluations
@@ -142,42 +120,129 @@ export const EvaluationContainer: React.FC = () => {
   // Gérer le clic pour voir une évaluation
   const handleViewEvaluation = (id: string) => {
     const evaluation = evaluations.find(e => e.id === id);
+
+    console.log("evaluation view", evaluation);
+    
     if (evaluation) {
       setSelectedEvaluation(evaluation);
       setMode('view');
     }
   };
-  
-  // Gérer le clic pour passer une évaluation
-  const handleTakeEvaluation = (id: string) => {
-    const evaluation = evaluations.find(e => e.id === id);
-    if (evaluation) {
-      setSelectedEvaluation(evaluation);
-      setMode('take');
-      
-      // Dans une vraie application, on créerait aussi une entrée dans la base de données
-      // pour indiquer que l'étudiant a commencé l'évaluation
+
+  // mettre a jour le temps de l'evaliuation
+  const handleCreateTakenEvaluation = async (id: string) => {
+
+    let evaluationUrl = `${URLS.API_BACK}/student_results/` 
+
+    const evaluation = evaluations?.find(e => e.id === id);
+
+    let data = {
+      evaluation: evaluation?.id,
+      score: 0,
+      duration: evaluation?.duration
+    }
+    
+
+    const response = await handlePost(evaluationUrl, data)
+
+    if(response.status === 201){
+      setTakenEvalResultId(response.id)
+      fetchEvaluations()
+      // handleTakeEvaluation(response.evaluation.id)
+      setPendingEvaluationId(response.evaluation)
+    } else if(response.status === 409){
+      setTakenEvalResultId(response.result_id)
+      // handleTakeEvaluation(response.evaluation_id)
+      setPendingEvaluationId(response.evaluation_id)
+    } else {
+      console.error("error has ocurred");
     }
   };
   
+  // Gérer le clic pour passer une évaluation
+  const handleTakeEvaluation = (seldEvaluation: {}, userEval: {}) => {
+
+    if (userEval) {
+      setSelectedEvaluationResponse(seldEvaluation)
+      setSelectedEvaluation(seldEvaluation);
+      setMode('take');
+    } else {
+      console.log("non enregistrer", userEval)
+    }
+  };
+
+  // console.log("selectedEvaluationResponse", selectedEvaluationResponse);
+
+  // mettre a jour le temps de l'evaliuation
+  const handleUpdateEvaluationConsommation = async (id: string, duration: string) => {
+
+    let evaluationUrl = `${URLS.API_BACK}/student_results/${id}/` 
+
+    let data = {
+      duration
+    }
+
+    const response = await handlePatch(evaluationUrl, data)
+
+    if(response.status === 200){
+      console.log("duration modified");
+    } else{
+      console.error("duration not modified");
+    }
+  };
+
+  
+  useEffect(() => {
+    
+    const evaluationExist = evaluations.find(e => e.id === pendingEvaluationId);
+
+    const userEvaluationExist = evaluationExist?.evaluation_results?.find((el)=>(el?.student === user.id))
+
+    // console.log("userEvaluationExist", userEvaluationExist);
+    
+    if (pendingEvaluationId !== null && userEvaluationExist) {
+      
+      // console.log("entré", true);
+      // console.log("userEvaluationExist", userEvaluationExist);
+      // console.log("pendingEvaluationId", pendingEvaluationId);
+
+
+      handleTakeEvaluation(evaluationExist, userEvaluationExist);
+
+      setPendingEvaluationId(null);
+    }
+
+  }, [pendingEvaluationId, evaluations]);
+
+  // console.log("takenEvaluations", takenEvaluations);
+
+  // console.log("allEvaluations", evaluations);
+  
+  
   // Gérer le clic pour voir les résultats d'une évaluation
   const handleViewResults = (id: string) => {
-    const evaluation = evaluations.find(e => e.id === id);
+    console.log("takenEvaluations", takenEvaluations);
+    
+    const evaluation = takenEvaluations.find(e => e.evaluation.id === id);
     if (evaluation) {
       setSelectedEvaluation(evaluation);
-      setMode('results');
+      setMode('results_view');
     }
   };
   
   // Gérer la soumission des réponses d'une évaluation
-  const handleSubmitEvaluation = (responses: any[]) => {
+  const handleSubmitEvaluation = async (responses: any[]) => {
+
     if (!selectedEvaluation) return;
+
+    console.log("user_responses",responses);
+    
     
     // Dans une vraie application, cela enverrait les réponses à l'API
     
     // Simuler l'évaluation automatique (pour les QCM et Vrai/Faux)
     const scoredResponses = responses.map(response => {
-      const question = selectedEvaluation.questions.find(q => q.id === response.questionId);
+      const question = selectedEvaluation?.questions.find((q) => q.id === response.questionId);
       
       let isCorrect = false;
       let score = 0;
@@ -186,22 +251,25 @@ export const EvaluationContainer: React.FC = () => {
         if (question.type === 'qcm') {
           // Pour les QCM, vérifier si toutes les réponses sont correctes
           const studentAnswers = response.responseContent as string[];
-          const correctAnswers = question.correctAnswer as string[];
+          const correctAnswers = question.correct_answer as string[];
           
           isCorrect = 
             studentAnswers.length === correctAnswers.length && 
-            studentAnswers.every(a => correctAnswers.includes(a));
+            studentAnswers.every(sa => correctAnswers.some(ca => ca.id === sa.id && ca.isCorrect === true))
+            // studentAnswers.every(a => correctAnswers.includes(a));
+          
+          console.log("studentAnswers.every(sa => correctAnswers.some(ca => ca.isCorrect === sa.isCorrect))", studentAnswers.every(sa => correctAnswers.some(ca => ca.isCorrect === sa.isCorrect)));
           
           if (isCorrect) {
             score = question.points || 0;
           } else {
             // Attribution partielle des points pour les réponses partiellement correctes
-            const correctCount = studentAnswers.filter(a => correctAnswers.includes(a)).length;
+            const correctCount = studentAnswers.filter(sa => correctAnswers.some(ca => ca.id === sa.id && ca.isCorrect === true)).length;
             score = Math.floor((correctCount / correctAnswers.length) * (question.points || 0));
           }
         } else if (question.type === 'vrai_faux') {
           // Pour Vrai/Faux, c'est soit tout juste, soit tout faux
-          isCorrect = response.responseContent === question.correctAnswer;
+          isCorrect = response.responseContent === question.correct_answer[0].text.toLowerCase();
           score = isCorrect ? (question.points || 0) : 0;
         }
         // Pour les questions de rédaction, le score sera attribué manuellement par l'enseignant
@@ -216,23 +284,43 @@ export const EvaluationContainer: React.FC = () => {
     
     // Calculer le score total
     const totalScore = scoredResponses.reduce((sum, r) => sum + r.score, 0);
+
+    let evaluationUrl = `${URLS.API_BACK}/student_results/${scoredResponses[0].resultId}/` 
+
+    let data: StudentEvaluation = {
+      score: totalScore,
+      completed: true,
+      submitted_at: new Date(),
+      responses: scoredResponses
+    }
+
+    const response = await handlePatch(evaluationUrl, data)
+
+    if(response.status === 200){
+      // Mettre à jour l'état
+      setStudentEvaluations([data]);
+      // setStudentEvaluations(prev => [...prev, data]);
+
+      // fetchEvaluations()
+      
+      // Afficher les résultats
+      setMode('results');
+      console.log("duration modified");
+    } else{
+      console.error("duration not modified");
+    }
     
     // Créer une nouvelle entrée d'évaluation complétée
-    const newStudentEvaluation: StudentEvaluation = {
-      evaluationId: selectedEvaluation.id,
-      studentId: currentStudentId,
-      status: 'completed',
-      startedAt: new Date(), // Dans une vraie app, on utiliserait le moment réel du début
-      submittedAt: new Date(),
-      score: totalScore,
-      responses: scoredResponses
-    };
+    // const newStudentEvaluation: StudentEvaluation = {
+    //   evaluationId: selectedEvaluation.id,
+    //   studentId: currentStudentId,
+    //   status: 'completed',
+    //   startedAt: new Date(), // Dans une vraie app, on utiliserait le moment réel du début
+    //   submittedAt: new Date(),
+    //   score: totalScore,
+    //   responses: scoredResponses
+    // };
     
-    // Mettre à jour l'état
-    setStudentEvaluations(prev => [...prev, newStudentEvaluation]);
-    
-    // Afficher les résultats
-    setMode('results');
   };
   
   // Modifier une évaluation (pour les professeurs)
@@ -256,23 +344,82 @@ export const EvaluationContainer: React.FC = () => {
   };
   
   // Gérer la soumission d'une nouvelle évaluation
-  const handleSubmitNewEvaluation = (newEvaluation: Omit<Evaluation, 'id' | 'createdAt'>) => {
+  const handleSubmitNewEvaluation = async (newEvaluation: Omit<Evaluation, 'id' | 'createdAt'>, course_id: string) => {
+    
+    const { questions, ...evaluationData } = newEvaluation;
+
+    let evalUrl = `${URLS.API_BACK}/evaluations_create/${course_id}/` 
+    let questionUrl = `${URLS.API_BACK}/questions_create/${course_id}/` 
+
+    try {
+      // Étape 1 : Créer l'évaluation
+      const evalResponse = await handlePost(evalUrl, evaluationData);
+  
+      if (evalResponse.status === 201) {
+        // const createdEvaluation = await evalResponse.json();
+        const evaluation = evalResponse.id;
+  
+        // Étape 2 : Parcourir les questions
+        const questionPromises = questions.map((question) => {
+          let correct_answer: any [] = []
+
+          question?.options.map((op)=>{
+            if(op.isCorrect){
+              correct_answer.push(op)
+            }
+          })
+
+          console.log("correct_answer", correct_answer);
+          
+
+          const questionPayload = {
+            ...question,
+            evaluation,
+            correct_answer
+            // options: question.options.map(({ text, isCorrect }) => ({
+            //   text,
+            //   isCorrect
+            // }))
+          };
+
+          return handlePost(questionUrl, questionPayload)
+  
+          // return fetch('/api/questions', {
+          //   method: 'POST',
+          //   headers: { 'Content-Type': 'application/json' },
+          //   body: JSON.stringify(questionPayload)
+          // });
+        });
+  
+        await Promise.all(questionPromises);
+        console.log('Évaluation et questions créées avec succès');
+      } else {
+        console.error('Erreur lors de la création de l’évaluation');
+      }
+    } catch (error) {
+      console.error('Erreur réseau ou serveur :', error);
+    }
+
+    // const response = handlePost(evalUrl, newEvaluation)
+    
     // Dans une vraie application, cela enverrait la nouvelle évaluation à l'API
     
     // Simuler l'ajout de l'évaluation avec un ID généré
-    const evaluationWithId: Evaluation = {
-      ...newEvaluation,
-      id: `${evaluations.length + 1}`, // Simple incrémentation pour l'ID
-      auteurId: 'prof123', // ID du professeur connecté
-      dateCreation: new Date().toISOString().split('T')[0], // Date du jour
-      pointsTotal: newEvaluation.questions.reduce((sum, q) => sum + q.points, 0), // Calculer le total des points
-      duree: 30, // Valeur par défaut
-      allowRetake: false, // Valeur par défaut
-      showCorrectAnswers: true // Valeur par défaut
-    };
+    // const evaluationWithId: Evaluation = {
+    //   ...newEvaluation,
+    //   id: `${evaluations.length + 1}`, // Simple incrémentation pour l'ID
+    //   auteurId: 'prof123', // ID du professeur connecté
+    //   dateCreation: new Date().toISOString().split('T')[0], // Date du jour
+    //   pointsTotal: newEvaluation.questions.reduce((sum, q) => sum + q.points, 0), // Calculer le total des points
+    //   duree: 30, // Valeur par défaut
+    //   allowRetake: false, // Valeur par défaut
+    //   showCorrectAnswers: true // Valeur par défaut
+    // };
     
-    // Ajouter la nouvelle évaluation à la liste
-    setEvaluations(prev => [...prev, evaluationWithId]);
+    // // Ajouter la nouvelle évaluation à la liste
+    // setEvaluations(prev => [...prev, evaluationWithId]);
+
+    fetchEvaluations()
     
     // Retourner au tableau de bord
     setMode('dashboard');
@@ -283,16 +430,48 @@ export const EvaluationContainer: React.FC = () => {
     if (!selectedEvaluation) return [];
     
     const studentEval = studentEvaluations.find(
-      se => se.evaluationId === selectedEvaluation.id && se.studentId === currentStudentId
+      se => se.responses.find((el)=>el.evaluationId === selectedEvaluation.id)
+      // se => se.evaluationId === selectedEvaluation.id && se.studentId === currentStudentId?.id
     );
+
+    console.log("selectedEvaluation", selectedEvaluation);
+    console.log("studentEval", studentEval);
+    // console.log("studentEvaluations", studentEvaluations);
+
+    
     
     return studentEval ? studentEval.responses : [];
+  };
+
+  // Obtenir les réponses de l'étudiant lorsqu'il veux les revoirs
+  const getStudentResponsesReview = () => {
+    if (!selectedEvaluation) return [];
+    
+    const studentEvalReview = selectedEvaluation.responses.find((el)=>el.evaluationId === selectedEvaluation?.evaluation.id);
+
+    console.log("selectedEvaluation", selectedEvaluation);
+    console.log("studentEvalReview", studentEvalReview);
+    // console.log("studentEvaluations", studentEvaluations);
+
+    
+    
+    return studentEvalReview ? [studentEvalReview] : [];
   };
   
   // Vérifier si l'étudiant a déjà complété l'évaluation sélectionnée
   const isSelectedEvaluationCompleted = () => {
     if (!selectedEvaluation) return false;
-    return completedEvaluationIds.includes(selectedEvaluation.id);
+
+    if   (
+      selectedEvaluation?.evaluation_results?.length === 0 ||
+      !selectedEvaluation.evaluation_results?.some(ue => ue?.student === user?.id) ||
+      selectedEvaluation.evaluation_results?.find(ue => ue?.student === user?.id)?.completed === false
+    ) {
+      return false
+    } else {
+      return true
+    }
+    // return completedEvaluationIds.includes(selectedEvaluation.id);
   };
   
   // Vérifier si l'étudiant peut passer l'évaluation sélectionnée
@@ -300,103 +479,130 @@ export const EvaluationContainer: React.FC = () => {
     if (!selectedEvaluation) return false;
     
     const today = new Date();
-    const limitDate = new Date(selectedEvaluation.dateLimit);
+    // const limitDate = new Date(selectedEvaluation.evaluation.date_line);
+    const limitDate = new Date(selectedEvaluation.date_line);
     
     // Vérifier si la date limite n'est pas dépassée
     const isNotExpired = today <= limitDate;
     
     // Vérifier si l'étudiant n'a pas déjà complété l'évaluation
     // ou si l'évaluation permet de multiples tentatives
-    const canTake = !isSelectedEvaluationCompleted() || selectedEvaluation.allowRetake;
+    // const canTake = !isSelectedEvaluationCompleted() || selectedEvaluation.evaluation.allow_retake;
+    const canTake = !isSelectedEvaluationCompleted() || selectedEvaluation.allow_retake;
     
     return isNotExpired && canTake;
   };
   
   // Fonctions pour basculer entre les modes du rôle utilisateur (pour la démonstration)
   const toggleUserRole = () => {
-    setUserRole(prev => prev === 'etudiant' ? 'professeur' : 'etudiant');
+    setUserRole(prev => prev === 'Etudiant' ? 'Professeur' : 'Etudiant');
   };
   
   return (
-    <div className="container mx-auto p-4">
-      {/* Bouton pour basculer entre les rôles (pour la démonstration uniquement) */}
-      <div className="mb-4 flex justify-end">
-        <button
-          onClick={toggleUserRole}
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Mode: {userRole === 'etudiant' ? 'Étudiant' : 'Professeur'}
-        </button>
-      </div>
-      
-      {/* Afficher le composant approprié selon le mode */}
-      {mode === 'dashboard' && (
-        <DashboardView
-          evaluations={evaluations}
-          userRole={userRole}
-          onCreateClick={handleCreateEvaluation}
-          onListClick={() => {}}
-          onViewEvaluation={handleViewEvaluation}
-          onEditEvaluation={userRole === 'professeur' ? handleEditEvaluation : undefined}
-          onDeleteEvaluation={userRole === 'professeur' ? handleDeleteEvaluation : undefined}
-          onTakeEvaluation={userRole === 'etudiant' ? handleTakeEvaluation : undefined}
-          onViewResults={userRole === 'etudiant' ? handleViewResults : undefined}
-          completedEvaluationIds={completedEvaluationIds}
-        />
-      )}
-      
-      {mode === 'view' && selectedEvaluation && (
-        <EvaluationDetails
-          evaluation={selectedEvaluation}
-          userRole={userRole}
-          onBack={() => setMode('dashboard')}
-          onTakeEvaluation={() => setMode('take')}
-          onEditEvaluation={() => handleEditEvaluation(selectedEvaluation.id)}
-          onDeleteEvaluation={() => handleDeleteEvaluation(selectedEvaluation.id)}
-          canTakeEvaluation={canTakeSelectedEvaluation()}
-          isCompleted={isSelectedEvaluationCompleted()}
-          onViewResults={() => setMode('results')}
-        />
-      )}
-      
-      {mode === 'take' && selectedEvaluation && (
-        <EvaluationResponse
-          evaluation={selectedEvaluation}
-          onSubmit={handleSubmitEvaluation}
-          onCancel={() => setMode('dashboard')}
-        />
-      )}
-      
-      {mode === 'results' && selectedEvaluation && (
-        <EvaluationResults
-          evaluation={selectedEvaluation}
-          responses={getStudentResponses()}
-          userRole={userRole}
-          onClose={() => setMode('dashboard')}
-          onRetakeEvaluation={
-            selectedEvaluation.allowRetake ? 
-              () => setMode('take') : 
-              undefined
-          }
-        />
-      )}
-      
-      {/* Rendu du composant CreateEvaluation */}
-      {mode === 'create' && (
-        <div className="container mx-auto p-4">
-          <CreateEvaluation
-            onSubmit={handleSubmitNewEvaluation}
+    <>
+      <Breadcrumb pageName={`${"Evaluation"}`} />
+      <div className="">
+        {/* Bouton pour basculer entre les rôles (pour la démonstration uniquement) */}
+        {/* <div className="mb-4 flex justify-end">
+          <button
+            onClick={toggleUserRole}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            Mode: {userRole === 'Etudiant' ? 'Étudiant' : 'Professeur'}
+          </button>
+        </div> */}
+        
+        {/* Afficher le composant approprié selon le mode */}
+        {mode === 'dashboard' && (
+          <DashboardView
+            evaluations={evaluations}
+            userRole={userRole}
+            onCreateClick={handleCreateEvaluation}
+            onListClick={() => {}}
+            onViewEvaluation={handleViewEvaluation}
+            onEditEvaluation={userRole === 'Professeur' ? handleEditEvaluation : undefined}
+            onDeleteEvaluation={userRole === 'Professeur' ? handleDeleteEvaluation : undefined}
+            onTakeEvaluation={userRole === 'Etudiant' ? handleCreateTakenEvaluation : undefined}
+            // onTakeEvaluation={userRole === 'Etudiant' ? handleTakeEvaluation : undefined}
+            onViewResults={userRole === 'Etudiant' ? handleViewResults : undefined}
+            completedEvaluationIds={completedEvaluationIds}
+            currentUser={user}
           />
-          <div className="mt-4">
-            <button 
-              onClick={() => setMode('dashboard')}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              Retour au tableau de bord
-            </button>
+        )}
+        
+        {mode === 'view' && selectedEvaluation && (
+          <EvaluationDetails
+            evaluation={selectedEvaluation}
+            userRole={userRole}
+            onBack={() => setMode('dashboard')}
+            onTakeEvaluation={(id: string) => {handleCreateTakenEvaluation(id)}}
+            // onTakeEvaluation={(id: string) => {setMode('take'); handleTakeEvaluation(id)}}
+            onEditEvaluation={() => handleEditEvaluation(selectedEvaluation.id)}
+            onDeleteEvaluation={() => handleDeleteEvaluation(selectedEvaluation.id)}
+            canTakeEvaluation={canTakeSelectedEvaluation()}
+            isCompleted={isSelectedEvaluationCompleted()}
+            onViewResults={() => {setMode('results_view'); handleViewResults(selectedEvaluation.id)}}
+          />
+        )}
+        
+        {mode === 'take' && selectedEvaluationResponse && (
+          <EvaluationResponse
+            evaluation={selectedEvaluationResponse}
+            selectedTakenEvalResultId={takenEvalResultId}
+            onSubmit={handleSubmitEvaluation}
+            updateDuration={handleUpdateEvaluationConsommation}
+            // createTakeEval={handleCreateTakenEvaluation}
+            onCancel={() => {setMode('dashboard'); fetchEvaluations(); fetchEvaluationsResult()}}
+            onFinish={() => {fetchEvaluations(); fetchEvaluationsResult()}}
+            currentUser={user}
+          />
+        )}
+        
+        {mode === 'results' && selectedEvaluation && (
+          <EvaluationResults
+            evaluation={selectedEvaluation}
+            responses={getStudentResponses()}
+            userRole={userRole}
+            onClose={() => setMode('dashboard')}
+            onRetakeEvaluation={
+              selectedEvaluation.evaluation?.allow_retake ? 
+                () => setMode('take') : 
+                undefined
+            }
+          />
+        )}
+
+        {mode === 'results_view' && selectedEvaluation && (
+          <ResultsView
+            evaluation={selectedEvaluation}
+            responses={getStudentResponsesReview()}
+            userRole={userRole}
+            onClose={() => setMode('dashboard')}
+            onRetakeEvaluation={
+              selectedEvaluation.evaluation?.allow_retake ? 
+                () => setMode('take') : 
+                undefined
+            }
+          />
+        )}
+        
+        {/* Rendu du composant CreateEvaluation */}
+        {mode === 'create' && (
+          <div className="container mx-auto p-4">
+            <CreateEvaluation
+              onSubmit={handleSubmitNewEvaluation}
+            />
+            <div className="mt-4">
+              <button 
+                onClick={() => setMode('dashboard')}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Retour au tableau de bord
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };

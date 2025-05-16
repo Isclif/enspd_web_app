@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '../common/Button';
 import { Evaluation, UserRole } from '../../types/evaluations';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface EvaluationDetailsProps {
-  evaluation: Evaluation;
+  evaluation: any;
   userRole: UserRole;
   onBack: () => void;
-  onTakeEvaluation?: () => void;
+  onTakeEvaluation?: (id: string) => void;
   onEditEvaluation?: () => void;
   onDeleteEvaluation?: () => void;
   canTakeEvaluation?: boolean;
@@ -41,14 +41,37 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  console.log("evaluation", evaluation);
+
+  // const totalPoints = evaluation?.questions.map((q)=>{
+  //   let totals: number | null = 0
+  //   totals += q?.points
+
+  //   return totals
+  // })
+
+  const targetDate = new Date(evaluation.date_line);
+  // const targetDate = new Date(evaluation.evaluation.date_line);
+  // const now = new Date();
+
+  // useEffect(()=>{
+
+  // }, [evaluation])
+
+  // const totalPoints = evaluation ? evaluation.evaluation.questions.reduce((sum, q) => sum + (q.points ?? 0), 0) : 0;
+  const totalPoints = evaluation ? evaluation.questions.reduce((sum, q) => sum + (q.points ?? 0), 0) : 0;
+
+  const [hours, minutes, seconds] = evaluation.duration.split(':').map(Number);
+  
   
   return (
     <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
       {/* En-tête */}
       <div className="mb-6 border-b pb-4">
         <div className="flex items-center space-x-2 mb-2">
-          <h2 className="text-xl font-bold">{evaluation.titre}</h2>
-          <span className={`text-xs px-2 py-1 rounded-full ${getBadgeColor(evaluation.type)}`}>
+          <h2 className="text-xl font-bold">{evaluation.title}</h2>
+          <span className={`text-xs px-2 py-1 rounded-full ${getBadgeColor(evaluation?.type)}`}>
             {evaluation.type === 'qcm' ? 'QCM' : 
              evaluation.type === 'redaction' ? 'Rédaction' : 'Vrai/Faux'}
           </span>
@@ -67,41 +90,41 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p className="text-gray-500">Date limite</p>
-            <p className="font-medium">{formatDate(evaluation.dateLimit)}</p>
+            <p className="font-medium">{formatDate(evaluation.date_line)}</p>
           </div>
           <div>
             <p className="text-gray-500">Nombre de questions</p>
             <p className="font-medium">{evaluation.questions.length}</p>
           </div>
-          {evaluation.duree && (
+          {evaluation.duration && (
             <div>
               <p className="text-gray-500">Durée</p>
-              <p className="font-medium">{evaluation.duree} minutes</p>
+              <p className="font-medium">{evaluation.duration} h:m:s</p>
             </div>
           )}
-          {evaluation.pointsTotal && (
+          {evaluation && (
             <div>
               <p className="text-gray-500">Points totaux</p>
-              <p className="font-medium">{evaluation.pointsTotal} points</p>
+              <p className="font-medium">{totalPoints} points</p>
             </div>
           )}
-          {userRole === 'etudiant' && (
+          {userRole === 'Etudiant' && (
             <div>
               <p className="text-gray-500">Tentatives autorisées</p>
-              <p className="font-medium">{evaluation.allowRetake ? 'Multiples' : 'Une seule'}</p>
+              <p className="font-medium">{evaluation.allow_retake ? 'Multiples' : 'Une seule'}</p>
             </div>
           )}
-          {userRole === 'professeur' && (
+          {userRole === 'Professeur' && (
             <div>
               <p className="text-gray-500">Afficher les réponses correctes</p>
-              <p className="font-medium">{evaluation.showCorrectAnswers ? 'Oui' : 'Non'}</p>
+              <p className="font-medium">{evaluation.show_correct_answers ? 'Oui' : 'Non'}</p>
             </div>
           )}
         </div>
       </div>
       
       {/* Aperçu des questions pour les professeurs uniquement */}
-      {userRole === 'professeur' && (
+      {userRole === 'Professeur' && (
         <div className="mb-6">
           <h3 className="text-lg font-medium mb-3">Questions ({evaluation.questions.length})</h3>
           <div className="space-y-3">
@@ -131,13 +154,13 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
       )}
       
       {/* Pour les étudiants, afficher un message sur l'évaluation */}
-      {userRole === 'etudiant' && !isCompleted && (
+      {userRole === 'Etudiant' && !isCompleted && (
         <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <h3 className="font-medium text-blue-800 mb-2">Informations importantes</h3>
           <ul className="list-disc list-inside text-blue-700 space-y-1">
             <li>Cette évaluation comporte {evaluation.questions.length} questions</li>
-            {evaluation.duree && <li>Vous disposez de {evaluation.duree} minutes pour la compléter</li>}
-            <li>Date limite de soumission: {formatDate(evaluation.dateLimit)}</li>
+            {evaluation.duration && <li>Vous disposez de {hours} heure(s), {minutes} minutes, {seconds} secondes pour la compléter</li>}
+            <li>Date limite de soumission: {formatDate(evaluation.date_line)}</li>
             {!evaluation.allowRetake && <li>Vous ne pourrez passer cette évaluation qu'une seule fois</li>}
           </ul>
         </div>
@@ -145,12 +168,12 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
       
       {/* Actions */}
       <div className="flex justify-between pt-4 border-t">
-        <Button variant="outline" onClick={onBack}>
+        <Button variant="secondary" onClick={onBack}>
           Retour
         </Button>
         
         <div className="flex space-x-2">
-          {userRole === 'etudiant' ? (
+          {userRole === 'Etudiant' ? (
             <>
               {isCompleted ? (
                 <Button 
@@ -162,7 +185,7 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
               ) : canTakeEvaluation ? (
                 <Button 
                   variant="primary" 
-                  onClick={onTakeEvaluation}
+                  onClick={()=>{onTakeEvaluation(evaluation?.id)}}
                 >
                   Commencer l'évaluation
                 </Button>
@@ -177,18 +200,18 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
             </>
           ) : (
             <>
-              <Button 
+              {/* <Button 
                 variant="secondary" 
                 onClick={onEditEvaluation}
               >
                 Modifier
-              </Button>
-              <Button 
+              </Button> */}
+              {/* <Button 
                 variant="danger" 
                 onClick={onDeleteEvaluation}
               >
                 Supprimer
-              </Button>
+              </Button> */}
             </>
           )}
         </div>
