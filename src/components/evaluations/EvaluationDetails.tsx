@@ -66,7 +66,7 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
   
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
+    <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto dark:bg-boxdark">
       {/* En-tête */}
       <div className="mb-6 border-b pb-4">
         <div className="flex items-center space-x-2 mb-2">

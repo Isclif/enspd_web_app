@@ -336,7 +336,7 @@ const ModalCoursContenu: React.FC<ModalFormProps> = ({
                         type={field.type}
                         value={formData[field.name] || ""}
                         onChange={handleChange}
-                        className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="dark:bg-boxdark w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder={field.placeholder}
                         />
                     </div>
@@ -347,7 +347,7 @@ const ModalCoursContenu: React.FC<ModalFormProps> = ({
                     name="type"
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="dark:bg-boxdark w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="">selectionner le type de contenu</option>
                         {typeContent?.map((elm) => (
@@ -363,7 +363,7 @@ const ModalCoursContenu: React.FC<ModalFormProps> = ({
                 name="text_content"
                 value={textContent}
                 onChange={(e) => setTextContext(e.target.value)}
-                className="w-full h-32 p-3 border border-zinc-300 rounded-md resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-zinc-400"
+                className="dark:bg-boxdark w-full h-32 p-3 border border-zinc-300 rounded-md resize-none shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-zinc-400"
                 placeholder={"Saisissez ou copiez et coller votre cour ici..."}
                 />
             </div>}

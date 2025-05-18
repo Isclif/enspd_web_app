@@ -358,7 +358,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
+    <div className="bg-white p-6 rounded-lg shadow dark:bg-boxdark">
       <h2 className="text-xl font-bold mb-4">Créer une nouvelle évaluation</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -369,7 +369,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
             name="course"
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
-            className={`w-full px-2 py-2 border ${errors.course ? 'border-red-500' : 'border-zinc-500'} rounded focus:outline-none focus:ring-2 focus:ring-black`}
+            className={`dark:bg-boxdark w-full px-2 py-2 border ${errors.course ? 'border-red-500' : 'border-zinc-500'} rounded focus:outline-none focus:ring-2 focus:ring-black`}
             >
               <option value="">Selectionnez le cours correspondant</option>
               {courses?.map((elm) => (
@@ -385,12 +385,13 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
             onChange={e => handleChange('title', e.target.value)}
             placeholder="Titre de l'évaluation"
             error={errors.title}
+            className='dark:bg-boxdark'
           />
           
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-2">Description</label>
             <textarea 
-              className={`w-full border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2`}
+              className={`dark:bg-boxdark w-full border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2`}
               value={formData.description}
               onChange={e => handleChange('description', e.target.value)}
               placeholder="Description de l'évaluation"
@@ -408,6 +409,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
             ]}
             value={formData.type}
             onChange={(value) => handleChange('type', value as QuestionType)}
+            className='dark:bg-boxdark'
           />
           
           <Input 
@@ -416,6 +418,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
             value={formData.date_line}
             onChange={e => handleChange('date_line', e.target.value)}
             error={errors.date_line}
+            className='dark:bg-boxdark'
           />
 
           {/* <Input 
@@ -430,7 +433,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
             <TimePicker 
               value={duration} 
               onChange={onChange} 
-              className={`w-full px-3 py-2 border ${errors.duration ? 'border-red-500' : 'border-zinc-500'}`} 
+              className={`dark:bg-boxdark dark:text-white w-full px-3 py-2 border ${errors.duration ? 'border-red-500' : 'border-zinc-500'}`} 
               showNow={false} 
               // use12Hours={false}
             />
@@ -446,6 +449,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
               type="button" 
               variant={showQuestionForm ? "secondary" : "primary"}
               onClick={() => setShowQuestionForm(!showQuestionForm)}
+              className='dark:bg-boxdark'
             >
               {showQuestionForm ? "Masquer le formulaire" : "Ajouter une question"}
             </Button>
@@ -470,6 +474,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                 onChange={e => handleQuestionChange('text', e.target.value)}
                 placeholder="Texte de la question"
                 error={errors.text}
+                className='dark:bg-boxdark'
               />
               
               <div className="flex space-x-4">
@@ -483,6 +488,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                   ]}
                   value={currentQuestion.type}
                   onChange={(value) => handleQuestionChange('type', value as QuestionType)}
+                  className='dark:bg-boxdark'
                 />
                 
                 <div className="w-1/4">
@@ -490,7 +496,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                   <input 
                     type="number" 
                     min="0" 
-                    className="w-full border border-gray-300 rounded px-3 py-2"
+                    className="w-full border border-gray-300 rounded px-3 py-2 dark:bg-boxdark"
                     value={currentQuestion.points}
                     onChange={e => handleQuestionChange('points', parseInt(e.target.value))}
                   />
@@ -514,7 +520,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                   
                   <div className="space-y-2 mb-4">
                     {currentQuestion.options.map(option => (
-                      <div key={option.id} className="flex items-center space-x-2 bg-white p-2 rounded border">
+                      <div key={option.id} className="flex items-center space-x-2 bg-white p-2 rounded border dark:bg-boxdark">
                         <input 
                           type={currentQuestion.type === 'qcm' ? 'checkbox' : 'radio'} 
                           checked={option.isCorrect}
@@ -545,7 +551,7 @@ export const CreateEvaluation: React.FC<CreateEvaluationProps> = ({ onSubmit }) 
                     <div className="flex space-x-2">
                       <input 
                         type="text" 
-                        className="flex-grow border border-gray-300 rounded px-3 py-2"
+                        className="flex-grow border border-gray-300 rounded px-3 py-2 dark:bg-boxdark"
                         value={newOption}
                         onChange={e => setNewOption(e.target.value)}
                         onKeyDown={handleKeyPress}

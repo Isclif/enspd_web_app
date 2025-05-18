@@ -118,7 +118,7 @@ const ModalSpecialities: React.FC<ModalFormProps> = ({
                         type={field.type}
                         value={formData[field.name] || ""}
                         onChange={handleChange}
-                        className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="dark:bg-boxdark w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder={field.placeholder}
                         />
                     </div>
@@ -129,7 +129,7 @@ const ModalSpecialities: React.FC<ModalFormProps> = ({
                         name="head"
                         value={selectedHeadDepartment}
                         onChange={(e) => setSelectedHeadDepartment(e.target.value)}
-                        className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="dark:bg-boxdark w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">selectionner le departement</option>
                             {data?.map((elm) => (

@@ -69,13 +69,25 @@ interface Token {
     // Par exemple: accessToken: string; refreshToken: string; etc.
 }
 
+interface Refresh {
+    // Ajoutez ici les propriétés de votre token
+    // Par exemple: accessToken: string; refreshToken: string; etc.
+}
+
 export default function AuthUser() {
+    
     const navigate = useNavigate();
 
     const getToken = (): Token | null => {
         const tokenString = sessionStorage.getItem('token');
         if (!tokenString) return null;
         return JSON.parse(tokenString) as Token;
+    }
+
+    const getRefresh = (): Refresh | null => {
+        const refreshString = sessionStorage.getItem('refresh');
+        if (!refreshString) return null;
+        return JSON.parse(refreshString) as Refresh;
     }
 
     const getUser = (): User | null => {
@@ -86,23 +98,21 @@ export default function AuthUser() {
 
     const [token, setToken] = useState<Token | null>(getToken());
     const [user, setUser] = useState<User | null>(getUser());
+    const [refresh, setRefresh] = useState<Refresh | null>(getRefresh());
 
-    const saveToken = (user: User, token: Token) => {
+    const saveToken = (user: User, token: Token, refresh: Refresh) => {
         sessionStorage.setItem('token', JSON.stringify(token));
         sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('refresh', JSON.stringify(refresh));
 
         setToken(token);
         setUser(user); 
+        setRefresh(refresh);
         if(token != undefined && user != undefined){
             setTimeout(() => {
                 navigate("/dashboard");
             }, 4000)
         }
-    }
-
-    const logout = () => {
-        sessionStorage.clear();
-        navigate('/');
     }
 
     const http = axios.create({
@@ -119,6 +129,7 @@ export default function AuthUser() {
         user,
         getToken,
         http,
-        logout
+        refresh,
+        getRefresh
     }
 }

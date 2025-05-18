@@ -35,10 +35,10 @@ const Login = () => {
 
             if (response.ok) {
                 setCoSuccess("Connexion réussie !");
-                setToken(data.user, data.access);
+                setToken(data.user, data.access, data.refresh);
 
-                // Masquer le message après 3 secondes
-                setTimeout(() => setCoSuccess(""), 3000);
+                // Masquer le message après 2 secondes
+                setTimeout(() => setCoSuccess(""), 2000);
             } else {
                 setErrorCo(data.error || data.message || "Échec de connexion. Vérifiez vos identifiants.");
             }

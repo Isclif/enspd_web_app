@@ -47,7 +47,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-10 p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-4xl mx-auto my-10 p-6 bg-white shadow-md rounded-lg dark:bg-boxdark">
       <h2 className="text-2xl font-semibold mb-4 text-center">Mon Profil</h2>
       
       {/* Photo de Profil + Modifier */}

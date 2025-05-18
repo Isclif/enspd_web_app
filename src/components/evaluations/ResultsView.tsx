@@ -33,7 +33,7 @@ export const ResultsView: React.FC<EvaluationResultsProps> = ({
   };
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
+    <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto dark:bg-boxdark">
       {/* En-tête */}
       <div className="mb-6 border-b pb-4">
         <div className="flex justify-between items-center">
@@ -50,25 +50,28 @@ export const ResultsView: React.FC<EvaluationResultsProps> = ({
             {isPassed ? 'Réussi' : 'Non réussi'}
           </span>
           <span className="text-sm text-gray-500 ml-3">
-            Soumis le {formatDate(new Date())}
+            Soumis le {formatDate(new Date(evaluation.submitted_at))}
           </span>
         </div>
       </div>
       
       {/* Résumé des réponses */}
       <div className="mb-6">
-        <h3 className="text-lg font-medium mb-4">Détail des réponses sffsdfssd</h3>
+        <h3 className="text-lg font-medium mb-4">Détail des réponses (Review)</h3>
         
         <div className="space-y-6">
           {evaluation?.evaluation?.questions.map((question, index) => {
             const response = responses.find(r => r.questionId === question.id);
             const isCorrect = response?.isCorrect;
+
+            console.log("response", response);
+            
             
             return (
               <div 
                 key={question.id} 
                 className={`p-4 rounded-lg ${
-                  isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                  isCorrect ? 'bg-green-50 dark:bg-green-900 border border-green-200' : 'dark:bg-red-900 bg-red-50 border border-red-200'
                 }`}
               >
                 <div className="flex justify-between items-start">
@@ -96,20 +99,24 @@ export const ResultsView: React.FC<EvaluationResultsProps> = ({
                 {/* Affichage de la réponse */}
                 <div className="mt-3">
                   <h4 className="text-sm font-medium text-gray-700">Votre réponse:</h4>
-                  <div className="mt-1 p-2 bg-white rounded border">
+                  <div className="mt-1 p-2 bg-white rounded border dark:bg-boxdark">
                     {question.type === 'qcm' && Array.isArray(response?.responseContent) ? (
                       <ul className="list-disc list-inside">
-                        {(response?.responseContent).map((item, i) => (
+                        {response !== undefined && response?.responseContent.length !== 0 ? 
+                        (response?.responseContent).map((item, i) => (
                           <li key={i}>{item.text}</li>
-                        ))}
+                        ))
+                       : 
+                       <li>aucune reponse selectionnée</li> }
                       </ul>
                     ) : question.type === 'vrai_faux' ? (
-                      <p>
-                        {typeof response?.responseContent === 'string'
-                          ? response.responseContent === 'vrai'
-                            ? 'Vrai'
-                            : 'Faux'
-                          : question.correct_answer[0]?.text === 'Vrai' ? 'Faux' : 'Vrai'
+                      <p> 
+                        {response?.responseContent === '' ? 'aucune reponse selectionnée' : 
+                          typeof response?.responseContent === 'string'
+                              ? response.responseContent === 'vrai'
+                                ? 'Vrai'
+                                : 'Faux'
+                              : question.correct_answer[0]?.text === 'Vrai' ? 'Faux' : 'Vrai'
                         }
                       </p>
                     ) : ""}
@@ -120,7 +127,7 @@ export const ResultsView: React.FC<EvaluationResultsProps> = ({
                 {(userRole === 'Professeur' || evaluation?.evaluation?.show_correct_answers) && question.correct_answer.length != 0 && (
                   <div className="mt-3">
                     <h4 className="text-sm font-medium text-gray-700">Réponse correcte:</h4>
-                    <div className="mt-1 p-2 bg-white rounded border">
+                    <div className="mt-1 p-2 bg-white rounded border dark:bg-boxdark">
                       {question.type === 'qcm' && Array.isArray(question.correct_answer) ? (
                         <ul className="list-disc list-inside">
                           {(question.correct_answer).map((item, i) => (

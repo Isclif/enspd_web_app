@@ -149,7 +149,7 @@ const ModalCours: React.FC<ModalFormProps> = ({
                         type={field.type}
                         value={formData[field.name] || ""}
                         onChange={handleChange}
-                        className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="dark:bg-boxdark w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder={field.placeholder}
                         />
                     </div>
@@ -160,7 +160,7 @@ const ModalCours: React.FC<ModalFormProps> = ({
                         name="instructor"
                         value={selectedInstructor}
                         onChange={(e) => setSelectedInstructor(e.target.value)}
-                        className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="dark:bg-boxdark w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">selectionner le prof du cours</option>
                             {dataInstructor?.map((elm) => (
@@ -174,7 +174,7 @@ const ModalCours: React.FC<ModalFormProps> = ({
                         name="speciality"
                         value={selectedSpeciality}
                         onChange={(e) => setSelectedSpeciality(e.target.value)}
-                        className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="dark:bg-boxdark w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">selectionner la spécialité</option>
                             {data?.map((elm) => (

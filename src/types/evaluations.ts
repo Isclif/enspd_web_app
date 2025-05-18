@@ -50,3 +50,7 @@ export interface StudentEvaluation {
   responses: any;
   submitted_at: Date;
 }
+
+export interface StudentNotes {
+
+}

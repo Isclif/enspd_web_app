@@ -1,19 +1,37 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import UserOne from '../../images/user/user-01.png';
 import userAdmin from '../../images/img/user/student_logo.png'
 import AuthUser from '../AuthUser/AuthUser';
 import { UserCircleIcon } from '@heroicons/react/24/solid';
 
+import URLS from "../../js/ConfigUrl"
+import { useFetch } from "../../js/useFetch"
+
 const DropdownUser = () => {
-  const {token, logout, user} = AuthUser();
+  const {token, user, refresh} = AuthUser();
+
+  const navigate = useNavigate();
+
+  const { handlePost } = useFetch();
   
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const disConnect = () => {
-    if (token !== undefined) {
-      logout();
+  const disConnect = async () => {
+    if (token !== undefined) { 
+      let url = `${URLS.API_BACK}/logout/`
+      let data = {
+        refresh: refresh 
+      }
+      const response = await handlePost(url, data)
+
+      if(response.status === 200){
+          sessionStorage.clear();
+          navigate('/');
+      } else {
+          console.log("unse erreur s'est produite");
+      }
     }
   };
 

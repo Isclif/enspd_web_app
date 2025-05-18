@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../common/Button';
-import { Evaluation, UserRole } from '../../types/evaluations';
+import { Evaluation, StudentNotes, UserRole } from '../../types/evaluations';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -17,6 +17,7 @@ interface DashboardViewProps {
   onViewResults?: (id: string) => void; // Nouvelle prop pour voir les résultats
   completedEvaluationIds?: string[]; // Liste des évaluations complétées par l'étudiant
   currentUser: {};
+  studentsResults: StudentNotes[]
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ 
@@ -30,10 +31,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onTakeEvaluation,
   onViewResults,
   currentUser,
-  completedEvaluationIds = []
+  completedEvaluationIds = [],
+  studentsResults
 }) => {
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past' | 'all' | 'students_results'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchStudentResult, setSearchStudentResult] = useState('');
+
+  const [studentResultData, setStudentResultData] = useState(studentsResults);
   
   const today = new Date();
   
@@ -41,12 +46,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   // const pastEvaluations = evaluations.filter(e => new Date(e.date_line) <= today);
   const pastEvaluations = userRole === "Professeur" ? evaluations.filter(e => new Date(e.date_line) <= today) : evaluations.filter(e => e?.evaluation_results.find(ue=>ue?.student === currentUser?.id)?.completed === true);
   
+  const upcommingStudentEvalCalc = () => { 
+
+    let upcoming: any[] = []
+    
+    upcomingEvaluations.map((el)=>{
+      
+
+      let unPermData = pastEvaluations.filter(e=>e.id === el.id)
+
+      if (unPermData.length === 0){
+        upcoming.push(upcomingEvaluations.find(e=>e.id === el.id))
+      }
+      
+      // console.log("upcoming", upcoming);
+    })
+
+    return upcoming
+  }
+
+  console.log("studentsResults", studentsResults);
+  
   const getFilteredEvaluations = () => {
     let filtered = evaluations;
     
     // Filtre par onglet
     if (activeTab === 'upcoming') {
-      filtered = upcomingEvaluations;
+      filtered = userRole === 'Etudiant' ? upcommingStudentEvalCalc() : upcomingEvaluations;
     } else if (activeTab === 'past') {
       filtered = pastEvaluations;
     }
@@ -62,6 +88,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     
     return filtered;
   };
+
+  useEffect(()=>{
+    setStudentResultData(studentsResults)
+  }, [studentsResults])
+
+  useEffect(()=>{
+    // Filtre par recherche resultat de l'etudiant
+    if(searchStudentResult !== ""){
+      if (searchStudentResult.trim()) {
+
+        let filtered = studentsResults
+
+        const term = searchStudentResult.toLowerCase();
+        
+        // filtered = filtered.filter(e => 
+        //   e.evaluation.title.toLowerCase().includes(term) || 
+        //   e.evaluation.description.toLowerCase().includes(term)
+        // );
+
+        filtered = filtered.filter(e => 
+          e.evaluation.title.toLowerCase().includes(term) || 
+          e.evaluation.description.toLowerCase().includes(term) ||
+          e.student_name.toLowerCase().includes(term)
+        );
+
+        setStudentResultData(filtered)
+      }
+    } else {
+      setStudentResultData(studentsResults)
+    }
+    
+  }, [searchStudentResult])
+
+  console.log("studentResultData", studentResultData);
+  
   
   const filteredEvaluations = getFilteredEvaluations();
   
@@ -70,12 +131,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return format(new Date(dateString), 'dd MMMM yyyy', { locale: fr });
   };
 
-  // const allEvaluationsUser = 
+  // console.log("pastEvaluations", pastEvaluations);
+  // console.log("upcomingEvaluations", upcomingEvaluations);
   
+
   // Calculer les statistiques
   const stats = {
     total: evaluations.length,
-    upcoming: upcomingEvaluations.length,
+    upcoming: userRole === 'Etudiant' ? upcommingStudentEvalCalc().length : upcomingEvaluations.length,
     past: pastEvaluations.length,
     completionRate: userRole === 'Etudiant' 
       ? pastEvaluations.length > 0 
@@ -114,10 +177,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const limitDate = new Date(dateLimit);
     return today <= limitDate;
   };
+
+  // const totalOfPoints = (studentResult: []) => {
+  //   const totalPoints = studentResult?.evaluation?.questions.reduce((sum, q) => sum + (q.points || 0), 0);
+  //   return totalPoints;
+  // };
+
+  const detailsScore = (studentResult: []) => {
+
+    const totalPoints = studentResult?.evaluation?.questions.reduce((sum, q) => sum + (q.points || 0), 0);
+
+    const earnedPoints = studentResult.responses?.reduce((sum, r) => sum + (r.score || 0), 0);
+
+    const percentageScore = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
+  
+    // Déterminer si l'évaluation est réussie (seuil arbitraire de 60%)
+    const isPassed = percentageScore >= 60;
+
+    let data = {
+      totalPoints,
+      earnedPoints,
+      percentageScore,
+      isPassed
+    }
+
+    return data;
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       {/* En-tête et statistiques */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-6 rounded-lg shadow dark:bg-boxdark">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Tableau de bord</h2>
           {userRole === 'Professeur' && (
@@ -131,7 +221,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-blue-50 p-4 rounded border border-blue-200">
+          <div className="bg-blue-50 p-4 rounded border border-blue-200 dark:bg-boxdark">
             <h3 className="font-bold text-blue-800">Total</h3>
             <p className="text-2xl font-bold">{stats.total}</p>
             <p className="text-gray-600">
@@ -139,19 +229,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
           
-          <div className="bg-green-50 p-4 rounded border border-green-200">
+          <div className="bg-green-50 p-4 rounded border border-green-200 dark:bg-boxdark">
             <h3 className="font-bold text-green-800">À venir</h3>
             <p className="text-2xl font-bold">{stats.upcoming}</p>
             <p className="text-gray-600">Évaluations en attente</p>
           </div>
           
-          <div className="bg-amber-50 p-4 rounded border border-amber-200">
+          <div className="bg-amber-50 p-4 rounded border border-amber-200 dark:bg-boxdark">
             <h3 className="font-bold text-amber-800">Passées</h3>
             <p className="text-2xl font-bold">{stats.past}</p>
             <p className="text-gray-600">Évaluations terminées</p>
           </div>
           
-          <div className="bg-purple-50 p-4 rounded border border-purple-200">
+          <div className="bg-purple-50 p-4 rounded border border-purple-200 dark:bg-boxdark">
             <h3 className="font-bold text-purple-800">Taux de complétion</h3>
             <p className="text-2xl font-bold">{stats.completionRate}%</p>
             <p className="text-gray-600">
@@ -162,7 +252,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
       
       {/* Liste des évaluations */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-6 rounded-lg shadow dark:bg-boxdark">
+        { activeTab !== 'students_results' ? 
+        
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">
             {userRole === 'Etudiant' ? 'Mes évaluations à passées' : 'Mes évaluations'}
@@ -171,7 +263,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <input
               type="text"
               placeholder="Rechercher une évaluation..."
-              className="pl-10 pr-4 py-2 border rounded-lg w-64"
+              className="pl-10 pr-4 py-2 border rounded-lg w-64 dark:bg-boxdark"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -191,6 +283,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </svg>
           </div>
         </div>
+        :
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">
+            Résultats de vos étudiants
+          </h2>
+          <div className="">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Rechercher par nom etudiant, titre evaluation, description..."
+                className="pl-10 pr-4 py-2 border rounded-lg w-64 dark:bg-boxdark"
+                value={searchStudentResult}
+                onChange={(e) => setSearchStudentResult(e.target.value)}
+              />
+              <svg
+                className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </div>
+            <div className='text-xs'>
+              *Recherchez par etudiant, evaluation, description
+            </div>
+          </div>
+        </div>
+        }
         
         {/* Onglets de filtrage */}
         <div className="flex border-b mb-4">
@@ -204,7 +331,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className={`px-4 py-2 font-medium ${activeTab === 'upcoming' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
             onClick={() => setActiveTab('upcoming')}
           >
-            À venir ({upcomingEvaluations.length})
+            À venir ({userRole === 'Etudiant' ? upcommingStudentEvalCalc().length : upcomingEvaluations.length})
           </button>
           <button
             className={`px-4 py-2 font-medium ${activeTab === 'past' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
@@ -212,9 +339,65 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           >
             Passées ({pastEvaluations.length})
           </button>
+
+          {userRole === 'Professeur' && 
+            <button
+              className={`px-4 py-2 font-medium ${activeTab === 'students_results' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+              onClick={() => setActiveTab('students_results')}
+            >
+              Résultats ({studentsResults.length})
+            </button>
+          }
         </div>
         
-        {filteredEvaluations.length === 0 ? (
+        {activeTab === "students_results" ? 
+        <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+          {studentResultData.length === 0 ? 
+            <p className="text-gray-500">Aucune évaluation trouvée</p>
+          :
+          <div className="space-y-4">
+            {studentResultData.map(stResult => (
+              <div 
+                key={stResult.id} 
+                className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex justify-between">
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-semibold text-lg">{stResult.student_name}</h3>
+                      
+                      <span className={`text-sm rounded-full`}>
+                        {stResult.evaluation.title}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${getBadgeColor(stResult.evaluation.type)}`}>
+                        {stResult.evaluation.type === 'qcm' ? 'QCM' : 
+                        stResult.evaluation.type === 'redaction' ? 'Rédaction' : 'Vrai/Faux'}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
+                      <span>Commencé le {formatDate(stResult.started_at)}</span>
+
+                      <span className="mx-2">•</span>
+                      
+                      <span>Transmis le {formatDate(stResult.submitted_at)}</span>
+                      
+                      <span className="mx-2">•</span>
+                      
+                      <div className='flex space-x-1'>
+                        <span className='font-bold'>Note: </span> 
+                        <div className={`${detailsScore(stResult).isPassed ? 'text-green-600' : 'text-red-600'}`}>
+                          {detailsScore(stResult).earnedPoints}/{detailsScore(stResult).totalPoints} points ({detailsScore(stResult).percentageScore}%)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>))}
+            </div>
+          }
+        </div> 
+        : 
+        filteredEvaluations.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
             <p className="text-gray-500">Aucune évaluation trouvée</p>
             {userRole === 'Professeur' && (

@@ -33,7 +33,7 @@ export const EvaluationResults: React.FC<EvaluationResultsProps> = ({
   };
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto">
+    <div className="bg-white p-6 rounded-lg shadow max-w-3xl mx-auto dark:bg-boxdark">
       {/* En-tête */}
       <div className="mb-6 border-b pb-4">
         <div className="flex justify-between items-center">
@@ -70,7 +70,7 @@ export const EvaluationResults: React.FC<EvaluationResultsProps> = ({
               <div 
                 key={question.id} 
                 className={`p-4 rounded-lg ${
-                  isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                  isCorrect ? 'bg-green-50 dark:bg-green-900 border border-green-200' : 'dark:bg-red-900 bg-red-50 border border-red-200'
                 }`}
               >
                 <div className="flex justify-between items-start">
@@ -97,7 +97,7 @@ export const EvaluationResults: React.FC<EvaluationResultsProps> = ({
                 {/* Affichage de la réponse */}
                 <div className="mt-3">
                   <h4 className="text-sm font-medium text-gray-700">Votre réponse:</h4>
-                  <div className="mt-1 p-2 bg-white rounded border">
+                  {/* <div className="mt-1 p-2 bg-white rounded border">
                     {question.type === 'qcm' && Array.isArray(response?.responseContent) ? (
                       <ul className="list-disc list-inside">
                         {(response?.responseContent).map((item, i) => (
@@ -107,6 +107,29 @@ export const EvaluationResults: React.FC<EvaluationResultsProps> = ({
                     ) : question.type === 'vrai_faux' && typeof response?.responseContent === 'string' ? (
                       <p>{(response?.responseContent as string) === 'vrai' ? 'Vrai' : 'Faux'}</p>
                     ) : ""}
+                  </div> */}
+
+                  <div className="mt-1 p-2 bg-white rounded border dark:bg-boxdark">
+                    {question.type === 'qcm' && Array.isArray(response?.responseContent) ? (
+                      <ul className="list-disc list-inside">
+                        {response !== undefined && response?.responseContent.length !== 0 ? 
+                        (response?.responseContent).map((item, i) => (
+                          <li key={i}>{item.text}</li>
+                        ))
+                       : 
+                       <li>aucune reponse selectionnée</li> }
+                      </ul>
+                    ) : question.type === 'vrai_faux' ? (
+                      <p> 
+                        {response?.responseContent === '' ? 'aucune reponse selectionnée' : 
+                          typeof response?.responseContent === 'string'
+                              ? response.responseContent === 'vrai'
+                                ? 'Vrai'
+                                : 'Faux'
+                              : question.correct_answer[0]?.text === 'Vrai' ? 'Faux' : 'Vrai'
+                        }
+                      </p>
+                    ) : ""}
                   </div>
                 </div>
                 
@@ -114,8 +137,8 @@ export const EvaluationResults: React.FC<EvaluationResultsProps> = ({
                 {(userRole === 'Professeur' || evaluation.show_correct_answers) && question.correct_answer.length != 0 && (
                   <div className="mt-3">
                     <h4 className="text-sm font-medium text-gray-700">Réponse correcte:</h4>
-                    <div className="mt-1 p-2 bg-white rounded border">
-                      {question.type === 'qcm' && Array.isArray(question.correct_answer) ? (
+                    <div className="mt-1 p-2 bg-white rounded border dark:bg-boxdark">
+                      {question.type === 'qcm' && Array.isArray(question.correct_answer) ? ( 
                         <ul className="list-disc list-inside">
                           {(question.correct_answer).map((item, i) => (
                             <li key={i}>{item.text}</li>

@@ -3,7 +3,7 @@ import { DashboardView } from '../components/evaluations/DashboardView';
 import { EvaluationDetails } from '../components/evaluations/EvaluationDetails';
 import { EvaluationResponse } from '../components/evaluations/EvaluationResponse';
 import { EvaluationResults } from '../components/evaluations/EvaluationResults';
-import { StudentEvaluation, UserRole } from '../types/evaluations';
+import { StudentEvaluation, StudentNotes, UserRole } from '../types/evaluations';
 import { CreateEvaluation, Evaluation } from '../components/evaluations/CreateEvaluation';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import AuthUser from "../components/AuthUser/AuthUser";
@@ -61,6 +61,9 @@ export const EvaluationContainer: React.FC = () => {
   // Réponses de l'étudiant (simulé)
   const [studentEvaluations, setStudentEvaluations] = useState<StudentEvaluation[]>([]);
 
+  // notes des etudiants
+  const [studentNotes, setStudentsNotes] = useState<StudentNotes[]>([]);
+
   // Current taken evaluation
   const [takenEvalResultId, setTakenEvalResultId] = useState<string>();
   
@@ -91,6 +94,22 @@ export const EvaluationContainer: React.FC = () => {
       }
   };
 
+  const fetchStudentsNotes = async () => {
+    try {
+        const response = await fetch(`${URLS.API_BACK}/student_results/`, {
+            method: "GET",
+            headers: headersList
+        });
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération des données');
+        }
+        const data: StudentNotes[] = await response.json();
+        setStudentsNotes(data);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des données:', error);
+    }
+};
+
   const fetchEvaluationsResult = async () => {
     try {
         const response = await fetch(`${URLS.API_BACK}/student_results/`, {
@@ -110,6 +129,10 @@ export const EvaluationContainer: React.FC = () => {
   useEffect(()=>{
     fetchEvaluations()
     fetchEvaluationsResult()
+
+    if(user.status === 'Professeur'){
+      fetchStudentsNotes()
+    }
   }, [])
   
   // Obtenir la liste des IDs d'évaluations complétées
@@ -240,7 +263,7 @@ export const EvaluationContainer: React.FC = () => {
     
     // Dans une vraie application, cela enverrait les réponses à l'API
     
-    // Simuler l'évaluation automatique (pour les QCM et Vrai/Faux)
+    // Correction de l'evaluation
     const scoredResponses = responses.map(response => {
       const question = selectedEvaluation?.questions.find((q) => q.id === response.questionId);
       
@@ -447,7 +470,7 @@ export const EvaluationContainer: React.FC = () => {
   const getStudentResponsesReview = () => {
     if (!selectedEvaluation) return [];
     
-    const studentEvalReview = selectedEvaluation.responses.find((el)=>el.evaluationId === selectedEvaluation?.evaluation.id);
+    const studentEvalReview = selectedEvaluation.responses.filter((el)=>el.evaluationId === selectedEvaluation?.evaluation.id);
 
     console.log("selectedEvaluation", selectedEvaluation);
     console.log("studentEvalReview", studentEvalReview);
@@ -455,7 +478,7 @@ export const EvaluationContainer: React.FC = () => {
 
     
     
-    return studentEvalReview ? [studentEvalReview] : [];
+    return studentEvalReview ? studentEvalReview : [];
   };
   
   // Vérifier si l'étudiant a déjà complété l'évaluation sélectionnée
@@ -527,6 +550,7 @@ export const EvaluationContainer: React.FC = () => {
             onViewResults={userRole === 'Etudiant' ? handleViewResults : undefined}
             completedEvaluationIds={completedEvaluationIds}
             currentUser={user}
+            studentsResults={studentNotes}
           />
         )}
         
@@ -563,7 +587,7 @@ export const EvaluationContainer: React.FC = () => {
             evaluation={selectedEvaluation}
             responses={getStudentResponses()}
             userRole={userRole}
-            onClose={() => setMode('dashboard')}
+            onClose={() => {setMode('dashboard'), fetchEvaluations(); fetchEvaluationsResult()}}
             onRetakeEvaluation={
               selectedEvaluation.evaluation?.allow_retake ? 
                 () => setMode('take') : 
@@ -577,7 +601,7 @@ export const EvaluationContainer: React.FC = () => {
             evaluation={selectedEvaluation}
             responses={getStudentResponsesReview()}
             userRole={userRole}
-            onClose={() => setMode('dashboard')}
+            onClose={() => {setMode('dashboard'), fetchEvaluations(); fetchEvaluationsResult()}}
             onRetakeEvaluation={
               selectedEvaluation.evaluation?.allow_retake ? 
                 () => setMode('take') : 
